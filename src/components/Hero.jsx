@@ -57,8 +57,8 @@ const Hero = () => {
     if (searchData.checkout) params.append('checkout', searchData.checkout);
     if (searchData.guests) params.append('guests', searchData.guests.value);
     if (searchData.accommodation) params.append('type', searchData.accommodation.value);
-    
-    navigate(`/search?${params.toString()}`);
+
+    // Remove or refactor navigate(`/search?...`) to FundFlare-relevant navigation.
   };
 
   return (

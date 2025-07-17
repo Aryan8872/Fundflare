@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaPaperPlane } from 'react-icons/fa';
+import { FaClock, FaEnvelope, FaMapMarkerAlt, FaPaperPlane, FaPhone } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const Contact = () => {
@@ -20,7 +20,7 @@ const Contact = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         if (!formData.name || !formData.email || !formData.subject || !formData.message) {
             toast.error('Please fill in all fields');
             return;
@@ -55,8 +55,8 @@ const Contact = () => {
                     <div>
                         <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-8">Get In Touch</h2>
                         <p className="text-lg text-gray-600 font-PoppinsRegular mb-8">
-                            Have questions about our camping sites or need assistance with your booking? 
-                            Our friendly team is here to help you plan the perfect outdoor adventure.
+                            Have questions about our campaigns or need assistance with your donation?
+                            Our friendly team is here to help you plan the perfect fundraising adventure.
                         </p>
 
                         <div className="space-y-6">
@@ -117,7 +117,7 @@ const Contact = () => {
                     {/* Contact Form */}
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                         <h2 className="text-2xl font-PoppinsBold text-gray-900 mb-6">Send us a Message</h2>
-                        
+
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
                                 <label className="block text-sm font-PoppinsMedium text-gray-700 mb-2">
@@ -201,30 +201,29 @@ const Contact = () => {
                     <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                            <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">How do I make a reservation?</h3>
+                            <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">How do I make a donation or start a campaign?</h3>
                             <p className="text-gray-600 font-PoppinsRegular">
-                                You can book your camping site through our website by selecting your preferred dates, 
-                                number of guests, and accommodation type. Payment is processed securely online.
+                                You can make a donation or start a campaign by visiting our website and selecting the "Donate" or "Start Campaign" option.
+                                You'll be guided through the process to ensure your donation or campaign is successful.
                             </p>
                         </div>
                         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                             <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">What is your cancellation policy?</h3>
                             <p className="text-gray-600 font-PoppinsRegular">
-                                Cancellations made 48 hours before check-in receive a full refund. 
+                                Cancellations made 48 hours before check-in receive a full refund.
                                 Cancellations within 48 hours are subject to a 50% charge.
                             </p>
                         </div>
                         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                             <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">Do you provide camping equipment?</h3>
                             <p className="text-gray-600 font-PoppinsRegular">
-                                Yes, we offer rental equipment including tents, sleeping bags, and cooking gear. 
-                                You can add these to your booking during the reservation process.
+                                Yes, we offer rental equipment including tents, sleeping bags, and cooking gear.
                             </p>
                         </div>
                         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                             <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">Are pets allowed?</h3>
                             <p className="text-gray-600 font-PoppinsRegular">
-                                Pets are welcome at most of our camping sites. Please check the specific site 
+                                Pets are welcome at most of our camping sites. Please check the specific site
                                 details for pet policies and any additional fees.
                             </p>
                         </div>

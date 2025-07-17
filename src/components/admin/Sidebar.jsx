@@ -1,14 +1,9 @@
-import { FaBell, FaCalendarAlt, FaCampground, FaClipboardList, FaCog, FaImages, FaSignOutAlt, FaTachometerAlt, FaTimes, FaUsers } from 'react-icons/fa';
+import { FaCog, FaSignOutAlt, FaTachometerAlt, FaTimes, FaUsers } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 
 const links = [
   { label: 'Dashboard', icon: <FaTachometerAlt />, to: '/admin', tab: 'dashboard' },
-  { label: 'Camping Sites', icon: <FaCampground />, to: '/admin?tab=camping-sites', tab: 'camping-sites' },
-  { label: 'Bookings', icon: <FaClipboardList />, to: '/admin?tab=bookings', tab: 'bookings' },
-  { label: 'Bookings by Day', icon: <FaCalendarAlt />, to: '/admin?tab=bookings-by-day', tab: 'bookings-by-day' },
   { label: 'Users', icon: <FaUsers />, to: '/admin?tab=users', tab: 'users' },
-  { label: 'Gallery', icon: <FaImages />, to: '/admin?tab=gallery', tab: 'gallery' },
-  { label: 'Notifications', icon: <FaBell />, to: '/admin?tab=notifications', tab: 'notifications' },
   { label: 'Settings', icon: <FaCog />, to: '/admin?tab=settings', tab: 'settings' },
 ];
 

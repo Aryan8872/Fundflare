@@ -3,15 +3,10 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import MainLayout from '../layout/MainLayout'
 import About from '../pages/About'
 import AdminDashboard from '../pages/AdminDashboard'
-import BookingHistory from '../pages/BookingHistory'
-import Campground from '../pages/Campground'
-import CampingDetail from '../pages/CampingDetail'
 import Contact from '../pages/Contact'
-import Gallery from '../pages/Gallery'
 import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
-import SearchPage from '../pages/SearchPage'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = ['user', 'admin'] }) => {
@@ -44,21 +39,11 @@ const Router = () => {
                 <Route element={<MainLayout />}>
                     <Route path='/' element={<Home />} />
                     <Route path='/about' element={<About />} />
-                    <Route path='/campground' element={<Campground />} />
                     <Route path='/contact' element={<Contact />} />
-                    <Route path='/gallery' element={<Gallery />} />
-                    <Route path='/search' element={<SearchPage />} />
-                    <Route path='/camping/:id' element={<CampingDetail />} />
-
-                    {/* Protected Routes */}
+                    {/* Add FundFlare-specific routes here, e.g., campaigns, donations, etc. */}
                     <Route path='/admin' element={
                         <ProtectedRoute allowedRoles={['admin']}>
                             <AdminDashboard />
-                        </ProtectedRoute>
-                    } />
-                    <Route path='/bookings' element={
-                        <ProtectedRoute allowedRoles={['user', 'admin']}>
-                            <BookingHistory />
                         </ProtectedRoute>
                     } />
                 </Route>

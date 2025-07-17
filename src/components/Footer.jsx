@@ -30,8 +30,6 @@ const Footer = () => (
           <ul className="space-y-2 font-PoppinsRegular text-sm lg:text-base">
             <li><a href="#" className="hover:text-green-200 transition-colors duration-200">Home</a></li>
             <li><a href="#" className="hover:text-green-200 transition-colors duration-200">About</a></li>
-            <li><a href="#" className="hover:text-green-200 transition-colors duration-200">Campground</a></li>
-            <li><a href="#" className="hover:text-green-200 transition-colors duration-200">Gallery</a></li>
             <li><a href="#" className="hover:text-green-200 transition-colors duration-200">Contact</a></li>
           </ul>
         </div>

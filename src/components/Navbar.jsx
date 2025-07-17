@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaBars, FaBookmark, FaSignOutAlt, FaTimes, FaUser } from "react-icons/fa";
+import { FaBars, FaSignOutAlt, FaTimes, FaUser } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "/assets/logo/logo.png";
@@ -57,10 +57,6 @@ const Navbar = () => {
         {
             label: "About",
             route: "/about"
-        },
-        {
-            label: "Campground",
-            route: "/campground"
         },
         {
             label: "Contact",
@@ -154,14 +150,6 @@ const Navbar = () => {
 
                             {userMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-                                    <Link
-                                        to="/bookings"
-                                        onClick={() => setUserMenuOpen(false)}
-                                        className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                                    >
-                                        <FaBookmark />
-                                        <span className="font-PoppinsMedium">My Bookings</span>
-                                    </Link>
                                     {user.role === 'admin' && (
                                         <Link
                                             to="/admin"
@@ -255,13 +243,6 @@ const Navbar = () => {
                                     <p className="text-sm text-gray-600">Welcome,</p>
                                     <p className="font-PoppinsBold text-primaryGreen">{user.name}</p>
                                 </div>
-                                <Link
-                                    to="/bookings"
-                                    onClick={closeMobileMenu}
-                                    className="block w-full bg-primaryGreen text-white py-3 rounded-lg font-PoppinsBold hover:bg-green-700 transition-colors duration-200 text-center"
-                                >
-                                    My Bookings
-                                </Link>
                                 {user.role === 'admin' && (
                                     <Link
                                         to="/admin"
