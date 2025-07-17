@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+
+
+@font-face {
+    font-family: PoppinsBold;
+    src: url('/assets/fonts/Poppins-Bold.ttf');
+}
+
+@font-face {
+    font-family: PoppinsMedium;
+    src: url('/assets/fonts/Poppins-Medium.ttf');
+}
+
+@font-face {
+    font-family: PoppinsRegular;
+    src: url('/assets/fonts/Poppins-Regular.ttf');
+}
+
+@font-face {
+    font-family: PoppinsSemiBold;
+    src: url('/assets/fonts/Poppins-SemiBold.ttf');
+}
+
+@font-face {
+    font-family: PoppinsLight;
+    src: url('/assets/fonts/Poppins-Light.ttf');
+}
+
+@theme {
+    --color-primaryGreen: #345E40;
+    --color-defaultbg: #F5F3E9;
+    --color-bodyBgColor: #f8f9fa;
+    --font-PoppinsBold: PoppinsBold;
+    --font-PoppinsSemiBold: PoppinsSemiBold;
+    --font-PoppinsMedium: PoppinsMedium;
+    --font-PoppinsRegular: PoppinsRegular;
+    --font-PoppinsLight: PoppinsLight
+}
+
+/* Line clamp utilities for text truncation */
+.line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideIn {
+    animation: slideIn 0.3s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth transitions for interactive elements */
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for modals */
+.modal-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Focus styles for better accessibility */
+.focus-ring:focus {
+    outline: 2px solid #345E40;
+    outline-offset: 2px;
+}
+
+/* Loading spinner */
+.spinner {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #345E40;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
