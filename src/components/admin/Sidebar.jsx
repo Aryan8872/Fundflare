@@ -1,6 +1,5 @@
 import { FaBell, FaCalendarAlt, FaCampground, FaClipboardList, FaCog, FaImages, FaSignOutAlt, FaTachometerAlt, FaTimes, FaUsers } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
-import AdminNotificationBell from './AdminNotificationBell';
 
 const links = [
   { label: 'Dashboard', icon: <FaTachometerAlt />, to: '/admin', tab: 'dashboard' },
@@ -33,7 +32,6 @@ const Sidebar = ({ activeTab, setActiveTab, onClose, isOpen }) => {
       <div className="flex items-center justify-between mb-8 px-2">
         <span className="text-2xl font-bold text-primaryGreen tracking-wide">EGATOR</span>
         <div className="flex items-center gap-2">
-          <AdminNotificationBell />
           <button
             className="lg:hidden p-2 rounded-full text-gray-500 hover:text-primaryGreen focus:outline-none focus:ring-2 focus:ring-primaryGreen"
             onClick={onClose}

@@ -12,12 +12,9 @@ import {
     useUpdateUserRoleMutation,
 } from '../api/api';
 import Sidebar from '../components/admin/Sidebar';
-import AdminNotificationsPage from './admin/AdminNotificationsPage';
-import BookingsAdmin from './admin/BookingsAdmin';
 import CampingSitesAdmin from './admin/CampingSitesAdmin';
 import GalleryAdmin from './admin/GalleryAdmin';
 import UsersAdmin from './admin/UsersAdmin';
-import BookingsByDayAdmin from './admin/BookingsByDayAdmin';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -320,12 +317,6 @@ const AdminDashboard = () => {
                         setEditingSite={setEditingSite}
                     />
                 )}
-                {activeTab === 'bookings' && (
-                    <BookingsAdmin bookings={bookings?.bookings || []} />
-                )}
-                {activeTab === 'bookings-by-day' && (
-                    <BookingsByDayAdmin />
-                )}
                 {activeTab === 'users' && (
                     <UsersAdmin
                         users={users?.users || []}
@@ -334,9 +325,6 @@ const AdminDashboard = () => {
                 )}
                 {activeTab === 'gallery' && (
                     <GalleryAdmin />
-                )}
-                {activeTab === 'notifications' && (
-                    <AdminNotificationsPage />
                 )}
                 {activeTab === 'settings' && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
