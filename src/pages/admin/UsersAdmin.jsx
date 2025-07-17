@@ -1,28 +1,9 @@
-import React, { useState } from 'react';
-import { FaEdit, FaUserShield, FaUser } from 'react-icons/fa';
-import Select from 'react-select';
-import { toast } from 'react-toastify';
-import { useGetAllUsersQuery, useUpdateUserRoleMutation } from '../../api/api';
+import React from 'react';
+import { FaEdit, FaUserShield } from 'react-icons/fa';
+import { useGetAllUsersQuery } from '../../api/api';
 
 const UsersAdmin = () => {
-    const { data: users, isLoading, refetch } = useGetAllUsersQuery();
-    const [updateUserRole] = useUpdateUserRoleMutation();
-
-    const roleOptions = [
-        { value: 'user', label: 'User' },
-        { value: 'admin', label: 'Admin' },
-    ];
-
-    const handleRoleChange = async (userId, newRole) => {
-        try {
-            await updateUserRole({ id: userId, role: newRole }).unwrap();
-            toast.success('User role updated successfully!');
-            refetch();
-        } catch (error) {
-            toast.error('Failed to update user role');
-            console.error('Failed to update user role:', error);
-        }
-    };
+    const { data: users, isLoading } = useGetAllUsersQuery();
 
     if (isLoading) {
         return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -35,7 +16,7 @@ const UsersAdmin = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-2xl lg:text-3xl font-PoppinsBold text-gray-900 mb-2">Users Management</h1>
-                        <p className="text-gray-600 font-PoppinsRegular">Manage user accounts, roles, and permissions</p>
+                        <p className="text-gray-600 font-PoppinsRegular">Manage user accounts and permissions</p>
                     </div>
                     <div className="bg-purple-50 border border-purple-200 px-4 py-3 rounded-xl">
                         <div className="text-sm text-purple-600 font-PoppinsMedium">
@@ -49,7 +30,7 @@ const UsersAdmin = () => {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <h2 className="text-lg font-PoppinsBold text-gray-900">All Users</h2>
-                    <p className="text-sm text-gray-600 mt-1">Manage user accounts and their access levels</p>
+                    <p className="text-sm text-gray-600 mt-1">User accounts and their access levels</p>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -73,31 +54,9 @@ const UsersAdmin = () => {
                                         <div className="text-base text-gray-900">{user.email}</div>
                                     </td>
                                     <td className="py-4 px-6">
-                                        <Select
-                                            value={roleOptions.find(option => option.value === user.role)}
-                                            onChange={(option) => handleRoleChange(user.id, option.value)}
-                                            options={roleOptions}
-                                            className="w-32"
-                                            styles={{
-                                                control: (provided) => ({
-                                                    ...provided,
-                                                    minHeight: '36px',
-                                                    fontSize: '14px',
-                                                    border: '1px solid #e5e7eb',
-                                                    borderRadius: '8px',
-                                                    boxShadow: 'none',
-                                                    '&:hover': {
-                                                        border: '1px solid #d1d5db',
-                                                    },
-                                                }),
-                                                option: (provided, state) => ({
-                                                    ...provided,
-                                                    fontSize: '14px',
-                                                    backgroundColor: state.isSelected ? '#8b5cf6' : state.isFocused ? '#f3f4f6' : 'white',
-                                                    color: state.isSelected ? 'white' : '#374151',
-                                                }),
-                                            }}
-                                        />
+                                        <span className="inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-PoppinsMedium">
+                                            {user.role}
+                                        </span>
                                     </td>
                                     <td className="py-4 px-6 text-sm text-gray-900">
                                         {new Date(user.createdAt).toLocaleDateString()}
