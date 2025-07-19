@@ -9,210 +9,93 @@ async function main() {
     // Create admin user
     const hashedPassword = await bcrypt.hash('admin123', 10);
     const adminUser = await prisma.user.upsert({
-        where: { email: 'admin@gcamping.com' },
+        where: { email: 'admin@fundflare.com' },
         update: {},
         create: {
             name: 'Admin User',
-            email: 'admin@gcamping.com',
+            email: 'admin@fundflare.com',
             password: hashedPassword,
-            role: 'admin',
+            role: 'ADMIN',
         },
     });
 
     // Create regular user
     const regularUser = await prisma.user.upsert({
-        where: { email: 'user@gcamping.com' },
+        where: { email: 'user@fundflare.com' },
         update: {},
         create: {
             name: 'Regular User',
-            email: 'user@gcamping.com',
+            email: 'user@fundflare.com',
             password: hashedPassword,
-            role: 'user',
+            role: 'DONOR',
         },
     });
 
-    // Create camping sites
-    const campingSitesData = [
+    // Create campaigns
+    const campaignsData = [
         {
-            name: 'Bell Glamp One',
-            description: 'A luxury glamping tent with all amenities for a comfortable stay. Experience the perfect blend of nature and comfort with our premium glamping setup.',
-            location: 'Mountain Valley, CA',
-            price: 120,
-            type: 'glamp',
-            capacity: 6,
-            size: '17m²',
-            amenities: ['Electricity', 'WiFi', 'Kitchen', 'Bathroom', 'Heating'],
-            images: ['/assets/images/glampimage.png'],
+            title: 'Clean Water for All',
+            description: 'Help us provide clean and safe drinking water to remote villages.',
+            goalAmount: 50000,
+            currentAmount: 25000,
+            duration: 90,
+            category: 'Health',
+            coverImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
             status: 'active',
-            latitude: 37.7749,
-            longitude: -122.4194,
+            creatorId: adminUser.id,
         },
         {
-            name: 'Caravan Solar Tent',
-            description: 'Eco-friendly caravan tent with solar power and modern facilities. Perfect for environmentally conscious campers who want modern conveniences.',
-            location: 'Desert Springs, AZ',
-            price: 100,
-            type: 'caravan',
-            capacity: 4,
-            size: '15m²',
-            amenities: ['Solar Power', 'Kitchen', 'Bathroom', 'Air Conditioning'],
-            images: ['/assets/images/trailerimage.png'],
+            title: 'Solar Power for Schools',
+            description: 'Support our mission to install solar panels in rural schools.',
+            goalAmount: 30000,
+            currentAmount: 10000,
+            duration: 60,
+            category: 'Education',
+            coverImage: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
             status: 'active',
-            latitude: 33.4484,
-            longitude: -112.0740,
+            creatorId: adminUser.id,
         },
         {
-            name: 'Glamping Tent',
-            description: 'Spacious glamping tent perfect for families and groups. Enjoy the outdoors with the comfort of a hotel room.',
-            location: 'Forest Haven, OR',
-            price: 90,
-            type: 'tent',
-            capacity: 6,
-            size: '20m²',
-            amenities: ['Comfortable Beds', 'Heating', 'Lighting', 'Storage'],
-            images: ['/assets/images/campingtentimage.png'],
+            title: 'Medical Aid for Children',
+            description: 'Fund life-saving medical treatments for children in need.',
+            goalAmount: 20000,
+            currentAmount: 5000,
+            duration: 45,
+            category: 'Medical',
+            coverImage: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2',
             status: 'active',
-            latitude: 45.5152,
-            longitude: -122.6784,
-        },
-        {
-            name: 'Small Cabin Wood',
-            description: 'Cozy wooden cabin nestled in nature for a peaceful retreat. Perfect for couples or small families seeking tranquility.',
-            location: 'Pine Ridge, WA',
-            price: 150,
-            type: 'cabin',
-            capacity: 4,
-            size: '25m²',
-            amenities: ['Fireplace', 'Kitchen', 'Bathroom', 'Deck', 'BBQ'],
-            images: ['/assets/images/activityimg.png'],
-            status: 'active',
-            latitude: 47.6062,
-            longitude: -122.3321,
-        },
-        {
-            name: 'Mountain View Camper',
-            description: 'Modern camper with stunning mountain views. Equipped with all modern amenities for a comfortable camping experience.',
-            location: 'Rocky Peak, CO',
-            price: 110,
-            type: 'camper',
-            capacity: 5,
-            size: '18m²',
-            amenities: ['Mountain View', 'Kitchen', 'Bathroom', 'Heating', 'WiFi'],
-            images: ['/assets/images/campingtentimage.png'],
-            status: 'active',
-            latitude: 39.7392,
-            longitude: -104.9903,
-        },
-        {
-            name: 'Lakeside Retreat',
-            description: 'Beautiful lakeside camping site with fishing and water activities. Perfect for water enthusiasts and nature lovers.',
-            location: 'Crystal Lake, MI',
-            price: 85,
-            type: 'tent',
-            capacity: 8,
-            size: '30m²',
-            amenities: ['Lake Access', 'Fishing Gear', 'Boat Rental', 'Fire Pit'],
-            images: ['/assets/images/glampimage.png'],
-            status: 'active',
-            latitude: 42.3314,
-            longitude: -83.0458,
+            creatorId: adminUser.id,
         },
     ];
-    await prisma.campingSite.createMany({ data: campingSitesData, skipDuplicates: true });
+    const createdCampaigns = await Promise.all(
+        campaignsData.map(data => prisma.campaign.create({ data }))
+    );
 
-    // Fetch camping sites to get their IDs
-    const campingSites = await prisma.campingSite.findMany();
-
-    // Create gallery images
-    const galleryImagesData = [
+    // Create donations
+    const donationsData = [
         {
-            title: 'Sunset at Bell Glamp',
-            description: 'Beautiful sunset view from our premium glamping site',
-            imageUrl: '/assets/images/glampimage.png',
-            category: 'glamp',
-            campingSiteId: campingSites[0]?.id,
-            status: 'active',
+            amount: 1000,
+            campaignId: createdCampaigns[0].id,
+            donorId: regularUser.id,
+            date: new Date('2024-06-10'),
+            type: 'ONE_TIME',
         },
         {
-            title: 'Solar Caravan Interior',
-            description: 'Modern interior of our eco-friendly solar caravan',
-            imageUrl: '/assets/images/trailerimage.png',
-            category: 'caravan',
-            campingSiteId: campingSites[1]?.id,
-            status: 'active',
+            amount: 500,
+            campaignId: createdCampaigns[1].id,
+            donorId: regularUser.id,
+            date: new Date('2024-07-15'),
+            type: 'ONE_TIME',
         },
         {
-            title: 'Family Camping',
-            description: 'Perfect family camping experience in our spacious tent',
-            imageUrl: '/assets/images/campingtentimage.png',
-            category: 'tent',
-            campingSiteId: campingSites[2]?.id,
-            status: 'active',
-        },
-        {
-            title: 'Cozy Cabin',
-            description: 'Warm and inviting wooden cabin in the forest',
-            imageUrl: '/assets/images/activityimg.png',
-            category: 'cabin',
-            campingSiteId: campingSites[3]?.id,
-            status: 'active',
-        },
-        {
-            title: 'Mountain Views',
-            description: 'Breathtaking mountain views from our camper site',
-            imageUrl: '/assets/images/campingtentimage.png',
-            category: 'camper',
-            campingSiteId: campingSites[4]?.id,
-            status: 'active',
-        },
-        {
-            title: 'Lakeside Activities',
-            description: 'Enjoy water activities at our lakeside retreat',
-            imageUrl: '/assets/images/glampimage.png',
-            category: 'activities',
-            campingSiteId: campingSites[5]?.id,
-            status: 'active',
-        },
-        {
-            title: 'Nature Trail',
-            description: 'Explore beautiful nature trails around our camping sites',
-            imageUrl: '/assets/images/campingtentimage.png',
-            category: 'nature',
-            status: 'active',
-        },
-        {
-            title: 'Campfire Evening',
-            description: 'Cozy campfire evenings with family and friends',
-            imageUrl: '/assets/images/trailerimage.png',
-            category: 'activities',
-            status: 'active',
+            amount: 200,
+            campaignId: createdCampaigns[2].id,
+            donorId: regularUser.id,
+            date: new Date('2024-08-20'),
+            type: 'ONE_TIME',
         },
     ];
-    await prisma.galleryImage.createMany({ data: galleryImagesData, skipDuplicates: true });
-
-    // Create sample bookings
-    await prisma.booking.create({
-        data: {
-            userId: regularUser.id,
-            campingSiteId: campingSites[0]?.id,
-            checkin: new Date('2024-07-15'),
-            checkout: new Date('2024-07-17'),
-            guests: 4,
-            total: 240,
-            status: 'active',
-        },
-    });
-    await prisma.booking.create({
-        data: {
-            userId: regularUser.id,
-            campingSiteId: campingSites[2]?.id,
-            checkin: new Date('2024-07-20'),
-            checkout: new Date('2024-07-22'),
-            guests: 6,
-            total: 180,
-            status: 'active',
-        },
-    });
+    await prisma.donation.createMany({ data: donationsData, skipDuplicates: true });
 
     console.log('Database seeding completed successfully!');
 }

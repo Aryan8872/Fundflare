@@ -1,132 +1,78 @@
-import React, { useEffect, useState } from 'react';
-import { FaBars, FaUsers } from 'react-icons/fa';
-import {
-    useGetAdminStatsQuery,
-    useGetAllUsersQuery,
-} from '../api/api';
-import Sidebar from '../components/admin/Sidebar';
-import UsersAdmin from './admin/UsersAdmin';
+import React from 'react';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useAdminStats } from '../hooks/useAdmin';
 
 const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState('dashboard');
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { user } = useAuthContext();
+    const { data, isLoading, isError, error } = useAdminStats();
 
-    // Read URL parameters
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-        console.log('URL params:', { tab, search: window.location.search });
-        if (tab) {
-            setActiveTab(tab);
-        }
-    }, []);
-
-    // API hooks
-    const { data: stats, isLoading: statsLoading } = useGetAdminStatsQuery();
-    const { data: users, isLoading: usersLoading } = useGetAllUsersQuery();
-
-    console.log('AdminDashboard state:', { activeTab, statsLoading, usersLoading });
-
-    // Responsive sidebar toggle
-    const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
-    useEffect(() => {
-        const handleResize = () => {
-            setIsLargeScreen(window.innerWidth >= 1024);
-            if (window.innerWidth >= 1024 && sidebarOpen) {
-                setSidebarOpen(false);
-            }
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [sidebarOpen]);
-
-    // Handler for main content click
-    const handleMainClick = () => {
-        if (sidebarOpen && !isLargeScreen) {
-            setSidebarOpen(false);
-        }
-    };
-
-    if (statsLoading || usersLoading) {
-        return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    if (!user || user.role !== 'ADMIN') {
+        return (
+            <div className="max-w-2xl mx-auto py-16 text-center">
+                <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+                <p className="text-gray-600">You do not have permission to view this page.</p>
+            </div>
+        );
     }
 
-    // Remove or replace any stat cards or analytics for bookings, camping sites, or gallery.
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-64">Loading...</div>;
+    }
+    if (isError) {
+        return <div className="flex justify-center items-center h-64 text-red-500">{error.message || 'Failed to load admin stats.'}</div>;
+    }
+
+    const stats = data?.stats || {};
+    const recentDonations = data?.recentDonations || [];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
-            {/* Sidebar (overlay on mobile, fixed on desktop) */}
-            <div className="lg:relative z-40">
-                {/* Mobile sidebar toggle button */}
-                <button
-                    className="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-full shadow-md border border-gray-200"
-                    onClick={() => setSidebarOpen(true)}
-                    aria-label="Open sidebar"
-                >
-                    <FaBars size={22} />
-                </button>
-                {/* Sidebar overlay for mobile */}
-                {sidebarOpen && !isLargeScreen && (
-                    <div className="fixed inset-0 z-40 bg-black bg-opacity-40" onClick={() => setSidebarOpen(false)}></div>
-                )}
-                <Sidebar
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    onClose={() => setSidebarOpen(false)}
-                    isOpen={sidebarOpen || isLargeScreen}
-                />
+        <div className="max-w-5xl mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-blue-100 rounded shadow p-4 text-center">
+                    <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                    <div className="text-gray-700">Users</div>
+                </div>
+                <div className="bg-green-100 rounded shadow p-4 text-center">
+                    <div className="text-2xl font-bold">{stats.totalCampaigns}</div>
+                    <div className="text-gray-700">Campaigns</div>
+                </div>
+                <div className="bg-yellow-100 rounded shadow p-4 text-center">
+                    <div className="text-2xl font-bold">{stats.totalDonations}</div>
+                    <div className="text-gray-700">Donations</div>
+                </div>
+                <div className="bg-purple-100 rounded shadow p-4 text-center">
+                    <div className="text-2xl font-bold">{stats.totalPayouts}</div>
+                    <div className="text-gray-700">Payouts</div>
+                </div>
             </div>
-
-            {/* Main content */}
-            <main
-                className="flex-1 min-w-0 flex flex-col p-2 sm:p-4 md:p-6 lg:p-8 transition-all duration-300"
-                style={{ marginLeft: isLargeScreen ? 0 : 0 }}
-                onClick={handleMainClick}
-            >
-                {/* Responsive stat cards and content */}
-                {activeTab === 'dashboard' && (
-                    <div className="space-y-4 md:space-y-6">
-                        {/* Page Header */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 lg:p-8">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <h1 className="text-xl md:text-2xl lg:text-3xl font-PoppinsBold text-gray-900 mb-2">Dashboard Overview</h1>
-                                    <p className="text-gray-600 font-PoppinsRegular text-sm md:text-base">Welcome back! Here's what's happening with your platform.</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="text-xs md:text-sm text-gray-500 bg-gray-50 px-3 md:px-4 py-2 rounded-lg">
-                                        Last updated: {new Date().toLocaleDateString()}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Stat Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-purple-500 rounded-xl">
-                                        <FaUsers className="text-white text-xl" />
-                                    </div>
-                                    <span className="text-purple-600 text-sm font-PoppinsMedium">Total Users</span>
-                                </div>
-                                <div className="text-3xl font-PoppinsBold text-gray-900 mb-1">{stats?.stats?.totalUsers || 0}</div>
-                                <p className="text-purple-600 text-sm font-PoppinsRegular">Registered users</p>
-                            </div>
-                        </div>
-                    </div>
+            <div className="bg-white rounded shadow p-6">
+                <h2 className="text-xl font-semibold mb-4">Recent Donations</h2>
+                {recentDonations.length === 0 ? (
+                    <div>No recent donations.</div>
+                ) : (
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr>
+                                <th className="py-2 px-2">Donor</th>
+                                <th className="py-2 px-2">Campaign</th>
+                                <th className="py-2 px-2">Amount</th>
+                                <th className="py-2 px-2">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentDonations.map((d, i) => (
+                                <tr key={i} className="border-t">
+                                    <td className="py-2 px-2">{d.donor?.name || 'N/A'}</td>
+                                    <td className="py-2 px-2">{d.campaign?.title || 'N/A'}</td>
+                                    <td className="py-2 px-2">${d.amount}</td>
+                                    <td className="py-2 px-2">{new Date(d.date).toLocaleDateString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
-                {activeTab === 'users' && (
-                    <UsersAdmin
-                        users={users?.users || []}
-                    />
-                )}
-                {activeTab === 'settings' && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="text-xl font-PoppinsBold text-gray-900 mb-4">Settings</h2>
-                        <p className="text-gray-600">Settings page coming soon...</p>
-                    </div>
-                )}
-            </main>
+            </div>
         </div>
     );
 };

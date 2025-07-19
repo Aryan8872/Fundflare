@@ -1,58 +1,50 @@
-import { useSelector } from 'react-redux'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import MainLayout from '../layout/MainLayout'
-import About from '../pages/About'
-import AdminDashboard from '../pages/AdminDashboard'
-import Browse from '../pages/Browse'
-import CampaignDetail from '../pages/CampaignDetail'
-import Company from '../pages/Company'
-import Contact from '../pages/Contact'
-import GetFunded from '../pages/GetFunded'
-import Home from '../pages/Home'
-import Invest from '../pages/Invest'
-import Login from '../pages/Login'
-import Register from '../pages/Register'
-import Resources from '../pages/Resources'
+import React from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAuthContext } from '../contexts/AuthContext';
+import MainLayout from '../layout/MainLayout';
+import CampaignsAdmin from '../pages/admin/CampaignsAdmin';
+import PayoutsAdmin from '../pages/admin/PayoutsAdmin';
+import UsersAdmin from '../pages/admin/UsersAdmin';
+import AdminDashboard from '../pages/AdminDashboard';
+import Browse from '../pages/Browse';
+import CampaignDetail from '../pages/CampaignDetail';
+import Company from '../pages/Company';
+import CreateCampaign from '../pages/CreateCampaign';
+import Home from '../pages/Home';
+import Invest from '../pages/Invest';
+import Login from '../pages/Login';
+import Profile from '../pages/Profile';
+import Register from '../pages/Register';
+import Resources from '../pages/Resources';
+import UserDashboard from '../pages/UserDashboard';
 
-const ProtectedRoute = ({ children, allowedRoles = ['user', 'admin'] }) => {
-    const { user, isAuthenticated, initialized } = useSelector((state) => state.auth);
-    if (!initialized) {
-        return <div className="flex justify-center items-center h-screen">Loading...</div>;
-    }
-    if (!isAuthenticated || !user) {
-        return <Navigate to="/login" replace />;
-    }
-    if (!allowedRoles.includes(user.role)) {
-        return <Navigate to="/" replace />;
-    }
+const AdminRoute = ({ children }) => {
+    const { user } = useAuthContext();
+    if (!user || user.role !== 'ADMIN') return <Navigate to="/" />;
     return children;
 };
 
-const Router = () => {
-    return (
-        <div>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route element={<MainLayout />}>
-                    <Route path='/' element={<Home />} />
-                    <Route path='/about' element={<About />} />
-                    <Route path='/contact' element={<Contact />} />
-                    <Route path='/invest' element={<Invest />} />
-                    <Route path='/get-funded' element={<GetFunded />} />
-                    <Route path='/browse' element={<Browse />} />
-                    <Route path='/resources' element={<Resources />} />
-                    <Route path='/company' element={<Company />} />
-                    <Route path='/campaign/:id' element={<CampaignDetail />} />
-                    <Route path='/admin' element={
-                        <ProtectedRoute allowedRoles={['admin']}>
-                            <AdminDashboard />
-                        </ProtectedRoute>
-                    } />
-                </Route>
-            </Routes>
-        </div>
-    )
-}
+const Router = () => (
+    <Routes>
+        <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/invest" element={<Invest />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/company" element={<Company />} />
+            <Route path="/campaigns/:id" element={<CampaignDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><UsersAdmin /></AdminRoute>} />
+            <Route path="/admin/campaigns" element={<AdminRoute><CampaignsAdmin /></AdminRoute>} />
+            <Route path="/admin/payouts" element={<AdminRoute><PayoutsAdmin /></AdminRoute>} />
+            <Route path="/create-campaign" element={<CreateCampaign />} />
+            <Route path="*" element={<Navigate to="/" />} />
+        </Route>
+    </Routes>
+);
 
-export default Router
+export default Router;

@@ -1,96 +1,80 @@
 import React from 'react';
-import { FaEdit, FaUserShield } from 'react-icons/fa';
-import { useGetAllUsersQuery } from '../../api/api';
+import { toast } from 'react-toastify';
+import { useAdminUsers, useDeactivateUser, useUpdateUserRole } from '../../hooks/useAdminUsers';
 
 const UsersAdmin = () => {
-    const { data: users, isLoading } = useGetAllUsersQuery();
+    const { data, isLoading, isError, error } = useAdminUsers();
+    const { mutate: updateRole } = useUpdateUserRole();
+    const { mutate: deactivate } = useDeactivateUser();
+    const users = data?.users || [];
 
-    if (isLoading) {
-        return <div className="flex justify-center items-center h-64">Loading...</div>;
-    }
+    const handleRoleChange = (userId, role) => {
+        updateRole(
+            { userId, role },
+            {
+                onSuccess: () => toast.success('Role updated'),
+                onError: (err) => toast.error(err.message || 'Failed to update role'),
+            }
+        );
+    };
+
+    const handleDeactivate = (userId) => {
+        if (window.confirm('Are you sure you want to deactivate this user?')) {
+            deactivate(userId, {
+                onSuccess: () => toast.success('User deactivated'),
+                onError: (err) => toast.error(err.message || 'Failed to deactivate user'),
+            });
+        }
+    };
 
     return (
-        <div className="space-y-6">
-            {/* Page Header */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl lg:text-3xl font-PoppinsBold text-gray-900 mb-2">Users Management</h1>
-                        <p className="text-gray-600 font-PoppinsRegular">Manage user accounts and permissions</p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 px-4 py-3 rounded-xl">
-                        <div className="text-sm text-purple-600 font-PoppinsMedium">
-                            Total Users: <span className="font-PoppinsBold text-purple-700">{users?.users?.length || 0}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Users Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                    <h2 className="text-lg font-PoppinsBold text-gray-900">All Users</h2>
-                    <p className="text-sm text-gray-600 mt-1">User accounts and their access levels</p>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-white border-b border-gray-100">
-                            <tr>
-                                <th className="text-left py-4 px-6 font-PoppinsMedium text-sm text-gray-600 uppercase tracking-wide">User</th>
-                                <th className="text-left py-4 px-6 font-PoppinsMedium text-sm text-gray-600 uppercase tracking-wide">Email</th>
-                                <th className="text-left py-4 px-6 font-PoppinsMedium text-sm text-gray-600 uppercase tracking-wide">Role</th>
-                                <th className="text-left py-4 px-6 font-PoppinsMedium text-sm text-gray-600 uppercase tracking-wide">Joined</th>
-                                <th className="text-left py-4 px-6 font-PoppinsMedium text-sm text-gray-600 uppercase tracking-wide">Actions</th>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold mb-6">User Management</h1>
+            {isLoading ? (
+                <div>Loading...</div>
+            ) : isError ? (
+                <div className="text-red-500">{error.message || 'Failed to load users.'}</div>
+            ) : users.length === 0 ? (
+                <div>No users found.</div>
+            ) : (
+                <table className="w-full text-left bg-white rounded shadow">
+                    <thead>
+                        <tr>
+                            <th className="py-2 px-2">Name</th>
+                            <th className="py-2 px-2">Email</th>
+                            <th className="py-2 px-2">Role</th>
+                            <th className="py-2 px-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map((u) => (
+                            <tr key={u.id} className="border-t">
+                                <td className="py-2 px-2">{u.name}</td>
+                                <td className="py-2 px-2">{u.email}</td>
+                                <td className="py-2 px-2">
+                                    <select
+                                        value={u.role}
+                                        onChange={e => handleRoleChange(u.id, e.target.value)}
+                                        className="border rounded px-2 py-1"
+                                    >
+                                        <option value="DONOR">Donor</option>
+                                        <option value="CREATOR">Creator</option>
+                                        <option value="ADMIN">Admin</option>
+                                    </select>
+                                </td>
+                                <td className="py-2 px-2">
+                                    <button
+                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                        onClick={() => handleDeactivate(u.id)}
+                                    >
+                                        Deactivate
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {users?.users?.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="py-4 px-6">
-                                        <div className="font-PoppinsMedium text-gray-900 text-base">{user.name}</div>
-                                        <div className="text-sm text-gray-500 mt-1">ID: {user.id}</div>
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        <div className="text-base text-gray-900">{user.email}</div>
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        <span className="inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-PoppinsMedium">
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td className="py-4 px-6 text-sm text-gray-900">
-                                        {new Date(user.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        <div className="flex gap-2">
-                                            <button
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 hover:border-blue-300"
-                                                title="Edit user"
-                                            >
-                                                <FaEdit size={16} />
-                                            </button>
-                                            <button
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
-                                                title="Delete user"
-                                            >
-                                                <FaUserShield size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {(!users?.users || users.users.length === 0) && (
-                    <div className="text-center py-16 text-gray-500">
-                        <div className="text-6xl mb-6">👥</div>
-                        <h3 className="text-xl font-PoppinsBold text-gray-900 mb-2">No users yet</h3>
-                        <p className="text-gray-600">Users will appear here when they register</p>
-                    </div>
-                )}
-            </div>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };

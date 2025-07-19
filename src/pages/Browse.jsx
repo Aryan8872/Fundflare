@@ -1,62 +1,75 @@
 import React, { useState } from 'react';
-import { useGetCampaignsQuery } from '../api/api';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useCampaigns } from '../hooks/useCampaigns';
+
+const categories = ['All', 'Health', 'Education', 'Medical', 'Startups'];
 
 const Browse = () => {
+    const [category, setCategory] = useState('All');
     const [search, setSearch] = useState('');
-    const { data: campaigns = [], isLoading, error } = useGetCampaignsQuery({ search });
+    const { data, isLoading, isError, error } = useCampaigns({ category: category !== 'All' ? category : undefined, search });
+    const navigate = useNavigate();
+
+    React.useEffect(() => {
+        if (isError && error) toast.error(error.message || 'Failed to load campaigns');
+    }, [isError, error]);
+
     return (
-        <div style={{ minHeight: '100vh', background: '#f5f7fa', color: '#0a58f7' }}>
-            {/* Hero Section */}
-            <section style={{ background: 'linear-gradient(135deg, #0a58f7 0%, #0039a6 100%)', color: '#fff', padding: '3rem 0 2rem 0', textAlign: 'center' }}>
-                <div style={{ maxWidth: 800, margin: '0 auto' }}>
-                    <h1 style={{ fontSize: 36, fontWeight: 800, margin: '1.5rem 0 1rem 0', lineHeight: 1.1 }}>
-                        Browse Startups & Campaigns
-                    </h1>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: 480, margin: '2rem auto 0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(10,88,247,0.10)' }}>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Search by name, category, or tag"
-                            style={{ flex: 1, border: 'none', outline: 'none', padding: '1rem', borderRadius: 12, fontSize: 18, color: '#0a58f7', background: 'transparent' }}
-                        />
-                        <button style={{ background: 'var(--primary-gradient)', color: '#fff', border: 'none', borderRadius: 12, padding: '0.75rem 1.5rem', fontWeight: 700, fontSize: 18, margin: 4, cursor: 'pointer' }}>
-                            Search
-                        </button>
-                    </div>
-                </div>
-            </section>
-            {/* Campaigns Grid */}
-            <section style={{ background: '#f5f7fa', color: '#0a58f7', padding: '3rem 0 2rem 0' }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
-                    <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 32 }}>All Campaigns</h2>
-                    {isLoading && <div>Loading campaigns...</div>}
-                    {error && <div style={{ color: 'red' }}>Failed to load campaigns.</div>}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32 }}>
-                        {campaigns.map((c) => (
-                            <div key={c.id} style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px rgba(10,88,247,0.08)', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 380 }}>
-                                <img src={c.coverImage || `https://source.unsplash.com/400x200/?startup,finance,${c.id}`} alt={c.title} style={{ width: '100%', height: 180, objectFit: 'cover' }} />
-                                <div style={{ padding: '1.5rem 1.5rem 1rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 0.5rem 0', color: '#0a58f7' }}>{c.title}</h3>
-                                    <p style={{ color: '#263238', fontSize: 15, marginBottom: 16, flex: 1 }}>{c.description}</p>
-                                    <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                                        <span style={{ background: '#e3e6f0', color: '#0a58f7', borderRadius: 8, padding: '0.25rem 0.75rem', fontWeight: 600, fontSize: 13 }}>{c.category}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-                                        <div style={{ fontWeight: 700, color: '#0a58f7', fontSize: 16 }}>${c.currentAmount?.toLocaleString() || 0}</div>
-                                        <div style={{ color: '#263238', fontSize: 14 }}>Raised</div>
-                                        <div style={{ fontWeight: 700, color: '#0a58f7', fontSize: 16, marginLeft: 16 }}>${c.goalAmount?.toLocaleString() || 0}</div>
-                                        <div style={{ color: '#263238', fontSize: 14 }}>Goal</div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <span style={{ color: '#0a58f7', fontWeight: 600, fontSize: 14 }}>{c.backers || 0} Backers</span>
-                                    </div>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <ToastContainer />
+            <h1 className="text-3xl font-bold mb-6">Browse Campaigns</h1>
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <select
+                    className="border rounded px-3 py-2"
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                >
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+                <input
+                    className="border rounded px-3 py-2 flex-1"
+                    type="text"
+                    placeholder="Search campaigns..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                />
+            </div>
+            {isLoading ? (
+                <div>Loading...</div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {data?.campaigns?.length ? (
+                        data.campaigns.map((c) => (
+                            <div
+                                key={c.id}
+                                className="bg-white rounded-lg shadow p-4 flex flex-col cursor-pointer hover:shadow-lg transition"
+                                onClick={() => navigate(`/campaigns/${c.id}`)}
+                            >
+                                {c.coverImage && (
+                                    <img src={c.coverImage} alt={c.title} className="h-40 w-full object-cover rounded mb-3" />
+                                )}
+                                <h2 className="text-xl font-semibold mb-2">{c.title}</h2>
+                                <p className="text-gray-600 mb-2 line-clamp-3">{c.description}</p>
+                                <div className="flex-1" />
+                                <div className="mt-2">
+                                    <div className="text-sm text-gray-500">Goal: ${c.goalAmount}</div>
+                                    <div className="text-sm text-gray-500">Raised: ${c.currentAmount}</div>
                                 </div>
+                                <button
+                                    className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                                    onClick={e => { e.stopPropagation(); navigate(`/campaigns/${c.id}`); }}
+                                >
+                                    View Details
+                                </button>
                             </div>
-                        ))}
-                    </div>
+                        ))
+                    ) : (
+                        <div>No campaigns found.</div>
+                    )}
                 </div>
-            </section>
+            )}
         </div>
     );
 };

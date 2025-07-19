@@ -1,46 +1,139 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetCampaignByIdQuery } from '../api/api';
+import DonationModal from '../components/DonationModal';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useCampaign } from '../hooks/useCampaigns';
 
 const CampaignDetail = () => {
     const { id } = useParams();
-    const { data: campaign, isLoading, error } = useGetCampaignByIdQuery(id);
-    if (isLoading) return <div style={{ padding: 40 }}>Loading campaign...</div>;
-    if (error || !campaign) return <div style={{ padding: 40, color: 'red' }}>Failed to load campaign.</div>;
+    const { data, isLoading, isError, error } = useCampaign(id);
+    const [donateOpen, setDonateOpen] = useState(false);
+    const [updates, setUpdates] = useState([]);
+    const [newUpdate, setNewUpdate] = useState('');
+    const { user } = useAuthContext();
+
+    useEffect(() => {
+        fetch(`/api/campaigns/${id}/updates`)
+            .then(res => res.json())
+            .then(data => setUpdates(data.updates || []));
+    }, [id]);
+
+    const handleAddUpdate = async (e) => {
+        e.preventDefault();
+        if (!newUpdate.trim()) return;
+        const res = await fetch(`/api/campaigns/${id}/updates`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: user?.token ? `Bearer ${user.token}` : undefined,
+            },
+            body: JSON.stringify({ content: newUpdate }),
+        });
+        if (res.ok) {
+            const { update } = await res.json();
+            setUpdates([update, ...updates]);
+            setNewUpdate('');
+        }
+    };
+
+    if (isLoading) return <div className="flex justify-center items-center h-64">Loading...</div>;
+    if (isError) return <div className="flex justify-center items-center h-64 text-red-500">{error.message || 'Failed to load campaign.'}</div>;
+
+    const c = data?.campaign;
+    if (!c) return <div className="text-center py-16">Campaign not found.</div>;
+
+    const progress = Math.min(100, (c.currentAmount / c.goalAmount) * 100);
+    const percentFunded = ((c.currentAmount / c.goalAmount) * 100).toFixed(1);
+    const canUpdate = user && (user.role === 'ADMIN' || user.id === c.creatorId);
+
     return (
-        <div style={{ minHeight: '100vh', background: '#f5f7fa', color: '#0a58f7' }}>
-            {/* Hero Section */}
-            <section style={{ background: 'linear-gradient(135deg, #0a58f7 0%, #0039a6 100%)', color: '#fff', padding: '3rem 0 2rem 0', textAlign: 'center' }}>
-                <div style={{ maxWidth: 900, margin: '0 auto' }}>
-                    <img src={campaign.coverImage || 'https://source.unsplash.com/800x400/?startup,finance'} alt={campaign.title} style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 18, boxShadow: '0 4px 24px rgba(10,88,247,0.10)', marginBottom: 24 }} />
-                    <h1 style={{ fontSize: 36, fontWeight: 800, margin: '1.5rem 0 1rem 0', lineHeight: 1.1 }}>{campaign.title}</h1>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16, flexWrap: 'wrap' }}>
-                        <span style={{ background: '#ffd600', color: '#0a58f7', borderRadius: 16, padding: '0.5rem 1.5rem', fontWeight: 700, fontSize: 15 }}>{campaign.category}</span>
-                        <span style={{ background: '#e3e6f0', color: '#0a58f7', borderRadius: 16, padding: '0.5rem 1.5rem', fontWeight: 700, fontSize: 15 }}>{campaign.equity || 'N/A'} Equity</span>
-                        <span style={{ background: '#e3e6f0', color: '#0a58f7', borderRadius: 16, padding: '0.5rem 1.5rem', fontWeight: 700, fontSize: 15 }}>{campaign.backers || 0} Backers</span>
+        <div className="max-w-4xl mx-auto px-4 py-10">
+            {/* Title and Organizer */}
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold mb-1">{c.title}</h1>
+                <div className="text-gray-500 text-sm mb-2">by <span className="font-semibold">{c.creator?.name || 'Organizer'}</span></div>
+            </div>
+            {/* Media */}
+            {c.coverImage && (
+                <div className="mb-6">
+                    <img src={c.coverImage} alt={c.title} className="w-full h-64 object-cover rounded-lg shadow" />
+                </div>
+            )}
+            {/* Description & Details */}
+            <div className="mb-6 bg-white rounded-lg shadow p-6">
+                <div className="flex flex-col md:flex-row md:gap-8">
+                    <div className="flex-1 mb-4 md:mb-0">
+                        <div className="flex items-center gap-2 mb-2 text-lg font-semibold">
+                            <span role="img" aria-label="lightbulb">💡</span> Summary
+                        </div>
+                        <div className="text-gray-700 mb-4">{c.description}</div>
+                        <div className="flex items-center gap-4 mb-2">
+                            <span className="flex items-center gap-1 text-gray-600"><span role="img" aria-label="calendar">📅</span> <span>Duration:</span> <span className="font-medium">{c.duration} days</span></span>
+                        </div>
+                        {c.location && (
+                            <div className="flex items-center gap-1 text-gray-600 mb-2">
+                                <span role="img" aria-label="location">📍</span> {c.location}
+                            </div>
+                        )}
+                    </div>
+                    <div className="w-full md:w-72 flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-lg font-semibold">
+                            <span role="img" aria-label="target">🎯</span> Goal
+                        </div>
+                        <div className="text-gray-700 text-xl font-bold mb-1">${c.goalAmount?.toLocaleString()}</div>
+                        <div className="flex items-center gap-2 text-gray-600">
+                            <span role="img" aria-label="money">💰</span> Raised: <span className="font-bold">${c.currentAmount?.toLocaleString()}</span> <span className="ml-2">({percentFunded}% funded)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded h-3">
+                            <div className="bg-blue-600 h-3 rounded" style={{ width: `${progress}%` }} />
+                        </div>
+                        <button
+                            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition font-semibold"
+                            onClick={() => setDonateOpen(true)}
+                        >
+                            💳 Donate
+                        </button>
                     </div>
                 </div>
-            </section>
-            {/* Campaign Details */}
-            <section style={{ background: '#fff', color: '#0a58f7', padding: '3rem 0 2rem 0' }}>
-                <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem' }}>
-                    <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>About this Campaign</h2>
-                    <p style={{ color: '#263238', fontSize: 16, marginBottom: 24 }}>{campaign.description}</p>
-                    <div style={{ marginBottom: 24 }}>
-                        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Funding Progress</div>
-                        <div style={{ background: '#e3e6f0', borderRadius: 8, height: 18, width: '100%', marginBottom: 8 }}>
-                            <div style={{ background: 'linear-gradient(90deg, #ffd600 0%, #0a58f7 100%)', borderRadius: 8, height: 18, width: `${(campaign.currentAmount / campaign.goalAmount) * 100}%`, transition: 'width 0.3s' }}></div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, color: '#263238' }}>
-                            <span>Raised: ${campaign.currentAmount?.toLocaleString() || 0}</span>
-                            <span>Goal: ${campaign.goalAmount?.toLocaleString() || 0}</span>
-                        </div>
-                    </div>
-                    <button style={{ background: 'var(--primary-gradient)', color: '#fff', fontWeight: 700, border: 'none', borderRadius: 10, padding: '0.75rem 2rem', fontSize: 16, boxShadow: '0 2px 8px rgba(10,88,247,0.10)', cursor: 'pointer' }}>
-                        Invest Now
-                    </button>
+            </div>
+            {/* About Organizer / Team */}
+            <div className="mb-6 bg-white rounded-lg shadow p-6">
+                <div className="flex items-center gap-2 mb-2 text-lg font-semibold">
+                    <span role="img" aria-label="organizer">👤</span> About the Organizer
                 </div>
-            </section>
+                <div className="text-gray-700">{c.creator?.name ? `${c.creator.name} is the organizer of this campaign.` : 'Organizer information coming soon.'}</div>
+            </div>
+            {/* Campaign Updates/Comments */}
+            <div className="mb-6 bg-white rounded-lg shadow p-6">
+                <div className="flex items-center gap-2 mb-4 text-lg font-semibold">
+                    <span role="img" aria-label="updates">📝</span> Campaign Updates
+                </div>
+                {canUpdate && (
+                    <form onSubmit={handleAddUpdate} className="mb-4 flex gap-2">
+                        <input
+                            className="flex-1 border rounded px-3 py-2"
+                            value={newUpdate}
+                            onChange={e => setNewUpdate(e.target.value)}
+                            placeholder="Add an update..."
+                        />
+                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Post</button>
+                    </form>
+                )}
+                <div className="space-y-3">
+                    {updates.length === 0 ? (
+                        <div className="text-gray-500">No updates yet.</div>
+                    ) : (
+                        updates.map(u => (
+                            <div key={u.id} className="border-b pb-2">
+                                <div className="text-gray-800">{u.content}</div>
+                                <div className="text-xs text-gray-400">{new Date(u.createdAt).toLocaleString()}</div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+            {/* Donation Modal */}
+            <DonationModal open={donateOpen} onClose={() => setDonateOpen(false)} campaignId={c.id} />
         </div>
     );
 };
