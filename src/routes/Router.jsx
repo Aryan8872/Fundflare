@@ -1,38 +1,28 @@
 import React from 'react';
-import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
-import AdminDashboard from '../pages/AdminDashboard';
-import Browse from '../pages/Browse';
-import CampaignDetail from '../pages/CampaignDetail';
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import Profile from '../pages/Profile';
-import Register from '../pages/Register';
-import UserDashboard from '../pages/UserDashboard';
+import MainLayout from '../layout/MainLayout';
 import CampaignsAdmin from '../pages/admin/CampaignsAdmin';
 import PayoutsAdmin from '../pages/admin/PayoutsAdmin';
 import UsersAdmin from '../pages/admin/UsersAdmin';
-import MainLayout from '../layout/MainLayout';
-import Invest from '../pages/Invest';
-import Resources from '../pages/Resources';
+import AdminDashboard from '../pages/AdminDashboard';
+import Browse from '../pages/Browse';
+import CampaignDetail from '../pages/CampaignDetail';
 import Company from '../pages/Company';
 import CreateCampaign from '../pages/CreateCampaign';
-import Sidebar from '../components/admin/Sidebar';
+import Home from '../pages/Home';
+import Invest from '../pages/Invest';
+import Login from '../pages/Login';
+import Profile from '../pages/Profile';
+import Register from '../pages/Register';
+import Resources from '../pages/Resources';
+import UserDashboard from '../pages/UserDashboard';
 
 const AdminRoute = ({ children }) => {
     const { user } = useAuthContext();
     if (!user || user.role !== 'ADMIN') return <Navigate to="/" />;
     return children;
 };
-
-const AdminLayout = () => (
-    <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1">
-            <Outlet />
-        </div>
-    </div>
-);
 
 const Router = () => (
     <Routes>
@@ -47,13 +37,11 @@ const Router = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><UsersAdmin /></AdminRoute>} />
+            <Route path="/admin/campaigns" element={<AdminRoute><CampaignsAdmin /></AdminRoute>} />
+            <Route path="/admin/payouts" element={<AdminRoute><PayoutsAdmin /></AdminRoute>} />
             <Route path="/create-campaign" element={<CreateCampaign />} />
-            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="users" element={<UsersAdmin />} />
-                <Route path="campaigns" element={<CampaignsAdmin />} />
-                <Route path="payouts" element={<PayoutsAdmin />} />
-            </Route>
             <Route path="*" element={<Navigate to="/" />} />
         </Route>
     </Routes>

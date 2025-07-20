@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useAdminStats } from '../hooks/useAdmin';
 
@@ -27,7 +26,7 @@ const AdminDashboard = () => {
     const recentDonations = data?.recentDonations || [];
 
     return (
-        <div className="px-4 py-8">
+        <div className="max-w-5xl mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-blue-100 rounded shadow p-4 text-center">
@@ -46,20 +45,6 @@ const AdminDashboard = () => {
                     <div className="text-2xl font-bold">{stats.totalPayouts}</div>
                     <div className="text-gray-700">Payouts</div>
                 </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Link to="/admin/campaigns" className="bg-white rounded shadow p-4 flex flex-col hover:bg-blue-50 transition">
-                    <div className="font-bold text-lg mb-2">Pending Campaigns</div>
-                    <div className="text-gray-600">Review and approve new campaign submissions.</div>
-                </Link>
-                <Link to="/admin/users" className="bg-white rounded shadow p-4 flex flex-col hover:bg-blue-50 transition">
-                    <div className="font-bold text-lg mb-2">Flagged Users</div>
-                    <div className="text-gray-600">Monitor and manage suspicious or flagged users.</div>
-                </Link>
-                <Link to="/admin/payouts" className="bg-white rounded shadow p-4 flex flex-col hover:bg-blue-50 transition">
-                    <div className="font-bold text-lg mb-2">Payout Requests</div>
-                    <div className="text-gray-600">Review and process payout requests.</div>
-                </Link>
             </div>
             <div className="bg-white rounded shadow p-6">
                 <h2 className="text-xl font-semibold mb-4">Recent Donations</h2>
