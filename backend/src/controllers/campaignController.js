@@ -4,7 +4,7 @@ import { createCampaignSchema, updateCampaignSchema } from '../validation/campai
 
 export const getAllCampaigns = catchAsync(async (req, res) => {
     const { search, category } = req.query;
-    const where = { status: 'active' };
+    const where = { status: { in: ['approved', 'active'] } };
     if (search) {
         where.OR = [
             { title: { contains: search, mode: 'insensitive' } },
@@ -73,6 +73,22 @@ export const updateCampaign = catchAsync(async (req, res) => {
     if (!campaign || campaign.creatorId !== req.user.id) throw { status: 403, message: 'Not authorized' };
     const data = updateCampaignSchema.parse(req.body);
     const updated = await campaignService.updateCampaign(id, data);
+    res.json({ campaign: updated });
+});
+
+export const adminUpdateCampaign = catchAsync(async (req, res) => {
+    if (!req.user || req.user.role !== 'ADMIN') throw { status: 403, message: 'Only admins can update campaigns' };
+    const { id } = req.params;
+    const data = req.body;
+    // Only allow fields that exist in the Prisma Campaign model
+    const allowedFields = [
+        'title', 'description', 'category', 'goalAmount', 'duration', 'coverImage', 'media', 'status', 'approvedBy', 'approvedAt', 'currentAmount', 'creatorId'
+    ];
+    const filteredData = {};
+    for (const key of allowedFields) {
+        if (data[key] !== undefined) filteredData[key] = data[key];
+    }
+    const updated = await campaignService.updateCampaign(id, filteredData);
     res.json({ campaign: updated });
 });
 

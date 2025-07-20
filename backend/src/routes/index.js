@@ -1,4 +1,5 @@
 import express from 'express';
+import { updateProfile } from '../controllers/authController.js';
 import adminRouter from './admin.js';
 import authRouter from './auth.js';
 import campaignRouter from './campaign.js';
@@ -12,5 +13,6 @@ router.use('/campaigns', campaignRouter);
 router.use('/donations', donationRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/admin', adminRouter);
+router.patch('/users/profile', auth, updateProfile);
 
 export default router; 

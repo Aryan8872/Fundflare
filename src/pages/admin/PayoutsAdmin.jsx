@@ -1,19 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { useApprovePayoutRequestMutation, useCompletePayoutRequestMutation, useGetAllPayoutRequestsQuery, useRejectPayoutRequestMutation } from '../../api/api';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 const PayoutsAdmin = () => {
-    const { data: payouts = [], isLoading, isError, error } = useGetAllPayoutRequestsQuery();
-    const [approvePayout] = useApprovePayoutRequestMutation();
-    const [rejectPayout] = useRejectPayoutRequestMutation();
-    const [completePayout] = useCompletePayoutRequestMutation();
+    const { token } = useAuthContext();
+    const [payouts, setPayouts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        setIsLoading(true);
+        fetch('/api/admin/payouts', {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(res => res.json())
+            .then(data => {
+                setPayouts(data.payouts || []);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                setError('Failed to load payout requests.');
+                setIsLoading(false);
+            });
+    }, [token]);
 
     const handleAction = async (id, action) => {
         try {
-            if (action === 'approve') await approvePayout(id).unwrap();
-            if (action === 'reject') await rejectPayout(id).unwrap();
-            if (action === 'complete') await completePayout(id).unwrap();
+            const res = await fetch(`/api/admin/payouts/${id}/${action}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error(`Failed to ${action} payout`);
             toast.success(`Payout ${action}d`);
+            setPayouts(payouts => payouts.map(p => p.id === id ? { ...p, status: action === 'approve' ? 'APPROVED' : action === 'reject' ? 'REJECTED' : 'COMPLETED' } : p));
         } catch (err) {
             toast.error(err.message || `Failed to ${action} payout`);
         }
@@ -24,8 +43,8 @@ const PayoutsAdmin = () => {
             <h1 className="text-2xl font-bold mb-6">Payout Requests</h1>
             {isLoading ? (
                 <div>Loading...</div>
-            ) : isError ? (
-                <div className="text-red-500">{error?.message || 'Failed to load payout requests.'}</div>
+            ) : error ? (
+                <div className="text-red-500">{error}</div>
             ) : payouts.length === 0 ? (
                 <div>No payout requests found.</div>
             ) : (

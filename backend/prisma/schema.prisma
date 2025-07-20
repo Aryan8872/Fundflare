@@ -34,7 +34,8 @@ model User {
   campaigns Campaign[] @relation("CampaignCreator")
   donations Donation[] @relation("DonationDonor")
   recurringDonations RecurringDonation[] @relation("RecurringDonor")
-  favorites Campaign[] @relation("UserFavorites", references: [id])
+  favorites Campaign[] @relation("UserFavorites")
+  notifications Notification[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -99,7 +100,7 @@ model PayoutRequest {
 
 model Transaction {
   id          String   @id @default(uuid())
-  donationId  String
+  donationId  String   @unique
   paymentId   String
   provider    String // Stripe, PayPal, etc.
   status      String // success, failed

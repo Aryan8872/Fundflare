@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useRegisterMutation } from '../api/api';
 
 const Register = () => {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
-    const [register, { isLoading, isError, error }] = useRegisterMutation();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError(null);
         try {
-            await register(form).unwrap();
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form),
+            });
+            if (!res.ok) throw new Error('Registration failed. Please try again.');
+            await res.json();
             navigate('/login');
-        } catch (err) { }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
     return (
         <div style={{ minHeight: '100vh', background: '#f5f7fa', color: '#0a58f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -26,7 +38,7 @@ const Register = () => {
                         {isLoading ? 'Signing up...' : 'Sign Up'}
                     </button>
                 </form>
-                {isError && <div style={{ color: 'red', marginTop: 16 }}>Registration failed. Please try again.</div>}
+                {error && <div style={{ color: 'red', marginTop: 16 }}>{error}</div>}
                 <div style={{ marginTop: 16, textAlign: 'center' }}>
                     <span style={{ color: '#263238' }}>Already have an account? </span>
                     <Link to="/login" style={{ color: '#0a58f7', fontWeight: 700 }}>Log In</Link>

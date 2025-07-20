@@ -1,18 +1,34 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useLoginMutation } from '../api/api';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const Login = () => {
     const [form, setForm] = useState({ email: '', password: '' });
-    const [login, { isLoading, isError, error }] = useLoginMutation();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const { login } = useAuthContext();
     const navigate = useNavigate();
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError(null);
         try {
-            await login(form).unwrap();
+            // Call backend login endpoint
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form),
+            });
+            if (!res.ok) throw new Error('Login failed. Please check your credentials.');
+            const data = await res.json();
+            login(data.user, data.token);
             navigate('/');
-        } catch (err) { }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
     return (
         <div style={{ minHeight: '100vh', background: '#f5f7fa', color: '#0a58f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -25,7 +41,7 @@ const Login = () => {
                         {isLoading ? 'Logging in...' : 'Log In'}
                     </button>
                 </form>
-                {isError && <div style={{ color: 'red', marginTop: 16 }}>Login failed. Please check your credentials.</div>}
+                {error && <div style={{ color: 'red', marginTop: 16 }}>{error}</div>}
                 <div style={{ marginTop: 16, textAlign: 'center' }}>
                     <span style={{ color: '#263238' }}>Don't have an account? </span>
                     <Link to="/register" style={{ color: '#0a58f7', fontWeight: 700 }}>Sign Up</Link>

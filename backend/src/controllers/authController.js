@@ -104,4 +104,16 @@ export const getCurrentUser = catchAsync(async (req, res) => {
     });
 
     res.json({ user });
+});
+
+export const updateProfile = catchAsync(async (req, res) => {
+  const userId = req.user.id;
+  const { name, email, password } = req.body;
+  const data = {};
+  if (name) data.name = name;
+  if (email) data.email = email;
+  if (password) data.password = await bcrypt.hash(password, 10);
+  const updated = await prisma.user.update({ where: { id: userId }, data });
+  const { password: _, ...userWithoutPassword } = updated;
+  res.json({ user: userWithoutPassword });
 }); 

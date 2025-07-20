@@ -16,5 +16,6 @@ router.get('/:id/updates', campaignController.getCampaignUpdates);
 router.post('/:id/updates', authenticateToken, campaignController.addCampaignUpdate);
 router.put('/:id', authenticateToken, requireRole(['CREATOR']), campaignController.updateCampaign);
 router.delete('/:id', authenticateToken, requireRole(['CREATOR']), campaignController.deleteCampaign);
+router.patch('/:id/admin', authenticateToken, requireRole(['ADMIN']), campaignController.adminUpdateCampaign);
 
 export default router; 

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
-import { useAuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
-    const { user } = useAuthContext();
+    const { user, logout } = useAuth();
     const [showNotif, setShowNotif] = useState(false);
     const [notifications, setNotifications] = useState([]);
 
@@ -50,8 +50,26 @@ const Navbar = () => {
                         )}
                     </div>
                 )}
-                <NavLink to="/login" className="navbar-link" style={{ color: "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none", marginRight: 8 }}>Log In</NavLink>
-                <NavLink to="/register" className="navbar-link px-7 py-3" style={{ background: "#fff", color: "black", fontWeight: 700, fontSize: 16, borderRadius: 8, textDecoration: "none", boxShadow: "0 2px 8px rgba(10,88,247,0.10)" }}>Sign Up</NavLink>
+                {!user && (
+                    <>
+                        <NavLink to="/login" className="navbar-link" style={{ color: "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none", marginRight: 8 }}>Log In</NavLink>
+                        <NavLink to="/register" className="navbar-link px-7 py-3" style={{ background: "#fff", color: "black", fontWeight: 700, fontSize: 16, borderRadius: 8, textDecoration: "none", boxShadow: "0 2px 8px rgba(10,88,247,0.10)" }}>Sign Up</NavLink>
+                    </>
+                )}
+                {user && (
+                    <div className="relative group">
+                        <button className="flex items-center gap-2 focus:outline-none">
+                            <span className="font-semibold">{user.name || user.email}</span>
+                            <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+                        <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden group-hover:block z-50">
+                            <NavLink to="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</NavLink>
+                            <button onClick={logout} className="block w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button>
+                        </div>
+                    </div>
+                )}
             </div>
         </nav>
     );
