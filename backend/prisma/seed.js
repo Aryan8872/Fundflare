@@ -71,6 +71,70 @@ async function main() {
         campaignsData.map(data => prisma.campaign.create({ data }))
     );
 
+    // Add more users
+    const creatorUser = await prisma.user.upsert({
+        where: { email: 'creator@fundflare.com' },
+        update: {},
+        create: {
+            name: 'Campaign Creator',
+            email: 'creator@fundflare.com',
+            password: hashedPassword,
+            role: 'CREATOR',
+        },
+    });
+
+    const donorUser2 = await prisma.user.upsert({
+        where: { email: 'donor2@fundflare.com' },
+        update: {},
+        create: {
+            name: 'Second Donor',
+            email: 'donor2@fundflare.com',
+            password: hashedPassword,
+            role: 'DONOR',
+        },
+    });
+
+    // Add a specific admin user for aryanbudathoki44@gmail.com
+    const adminAryan = await prisma.user.upsert({
+        where: { email: 'aryanbudathoki44@gmail.com' },
+        update: {},
+        create: {
+            name: 'Aryan Budathoki',
+            email: 'aryanbudathoki44@gmail.com',
+            password: hashedPassword,
+            role: 'ADMIN',
+        },
+    });
+
+    // Add more campaigns
+    const moreCampaigns = [
+        {
+            title: 'Books for Kids',
+            description: 'Donate books to underprivileged children.',
+            goalAmount: 8000,
+            currentAmount: 2000,
+            duration: 30,
+            category: 'Education',
+            coverImage: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
+            status: 'active',
+            creatorId: creatorUser.id,
+        },
+        {
+            title: 'Disaster Relief Fund',
+            description: 'Support families affected by natural disasters.',
+            goalAmount: 100000,
+            currentAmount: 40000,
+            duration: 120,
+            category: 'Relief',
+            coverImage: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
+            status: 'active',
+            creatorId: creatorUser.id,
+        },
+    ];
+    const allCampaigns = createdCampaigns.concat(
+        await Promise.all(moreCampaigns.map(data => prisma.campaign.create({ data })))
+    );
+
     // Create donations
     const donationsData = [
         {
@@ -96,6 +160,25 @@ async function main() {
         },
     ];
     await prisma.donation.createMany({ data: donationsData, skipDuplicates: true });
+
+    // Add more donations
+    const moreDonations = [
+        {
+            amount: 150,
+            campaignId: allCampaigns[3].id,
+            donorId: donorUser2.id,
+            date: new Date('2024-09-01'),
+            type: 'ONE_TIME',
+        },
+        {
+            amount: 300,
+            campaignId: allCampaigns[4].id,
+            donorId: regularUser.id,
+            date: new Date('2024-09-10'),
+            type: 'ONE_TIME',
+        },
+    ];
+    await prisma.donation.createMany({ data: moreDonations, skipDuplicates: true });
 
     console.log('Database seeding completed successfully!');
 }

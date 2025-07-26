@@ -23,4 +23,7 @@ router.get('/campaigns', adminController.getAllCampaignsAdmin);
 // Donation Management
 router.get('/donations', adminController.getAllDonationsAdmin);
 
+// Activity Logs
+router.get('/logs', adminController.getActivityLogs);
+
 export default router; 

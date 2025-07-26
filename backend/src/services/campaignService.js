@@ -19,4 +19,11 @@ export const updateCampaign = async (id, data) => {
 
 export const deleteCampaign = async (id) => {
     return prisma.campaign.delete({ where: { id } });
+};
+
+export const getCampaignUpdates = async (campaignId) => {
+    return prisma.campaignUpdate.findMany({
+        where: { campaignId },
+        orderBy: { createdAt: 'desc' }
+    });
 }; 

@@ -3,10 +3,10 @@ import { createDonation, getUserDonations } from '../api/donationApi';
 import { useAuthContext } from '../contexts/AuthContext';
 
 export const useCreateDonation = () => {
-    const { token } = useAuthContext();
+    const { user } = useAuthContext();
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data) => createDonation(data, token),
+        mutationFn: (data) => createDonation(data, user.token),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['userDonations'] });
         },
@@ -14,10 +14,10 @@ export const useCreateDonation = () => {
 };
 
 export const useUserDonations = () => {
-    const { token } = useAuthContext();
+    const { user } = useAuthContext();
     return useQuery({
         queryKey: ['userDonations'],
-        queryFn: () => getUserDonations(token),
-        enabled: !!token,
+        queryFn: () => getUserDonations(user.token),
+        enabled: !!user.token,
     });
 }; 

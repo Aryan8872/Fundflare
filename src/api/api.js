@@ -5,13 +5,6 @@ export const api = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: 'http://localhost:5000/api',
         credentials: 'include',
-        prepareHeaders: (headers, { getState }) => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                headers.set('authorization', `Bearer ${token}`);
-            }
-            return headers;
-        },
     }),
     tagTypes: ['Campaign', 'Donation', 'User', 'AdminStats', 'Auth'],
     endpoints: (builder) => ({

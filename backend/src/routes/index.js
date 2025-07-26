@@ -1,5 +1,7 @@
 import express from 'express';
 import { updateProfile } from '../controllers/authController.js';
+import * as donationController from '../controllers/donationController.js';
+import { authenticateToken } from '../middleware/auth.js';
 import adminRouter from './admin.js';
 import authRouter from './auth.js';
 import campaignRouter from './campaign.js';
@@ -13,6 +15,6 @@ router.use('/campaigns', campaignRouter);
 router.use('/donations', donationRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/admin', adminRouter);
-router.patch('/users/profile', auth, updateProfile);
+router.patch('/users/profile', authenticateToken, updateProfile);
 
 export default router; 

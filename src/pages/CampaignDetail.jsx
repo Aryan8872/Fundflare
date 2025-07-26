@@ -25,7 +25,6 @@ const CampaignDetail = () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: user?.token ? `Bearer ${user.token}` : undefined,
             },
             body: JSON.stringify({ content: newUpdate }),
         });

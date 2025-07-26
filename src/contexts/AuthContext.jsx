@@ -1,35 +1,29 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getCurrentUser } from '../api/authApi';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        const stored = localStorage.getItem('user');
-        return stored ? JSON.parse(stored) : null;
-    });
-    const [token, setToken] = useState(() => localStorage.getItem('token'));
+    const [user, setUser] = useState();
 
     useEffect(() => {
-        if (user) localStorage.setItem('user', JSON.stringify(user));
-        else localStorage.removeItem('user');
-        if (token) localStorage.setItem('token', token);
-        else localStorage.removeItem('token');
-    }, [user, token]);
+        // On mount, check if user is authenticated
+        getCurrentUser().then(u => {
+            console.log('[AuthContext] getCurrentUser result:', u);
+            if (u) setUser(u);
+            else setUser(null);
+        });
+    }, []);
 
-    const login = (userData, token) => {
-        setUser(userData);
-        setToken(token);
-    };
+    useEffect(() => {
+        console.log('[AuthContext] user state changed:', user);
+    }, [user]);
 
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-    };
+    const login = (userData) => setUser(userData);
+    const logout = () => setUser(null);
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

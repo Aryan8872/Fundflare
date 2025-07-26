@@ -6,7 +6,7 @@ const statusOptions = ['All', 'pending', 'approved', 'rejected'];
 const categories = ['Health', 'Education', 'Medical', 'Startups'];
 
 const CampaignsAdmin = () => {
-    const { token } = useAuthContext();
+    const { user } = useAuthContext();
     const [campaigns, setCampaigns] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -17,9 +17,7 @@ const CampaignsAdmin = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        fetch('/api/admin/campaigns', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
+        fetch('/api/admin/campaigns')
             .then(res => res.json())
             .then(data => {
                 setCampaigns(data.campaigns || []);
@@ -29,14 +27,13 @@ const CampaignsAdmin = () => {
                 setError('Failed to load campaigns.');
                 setIsLoading(false);
             });
-    }, [token]);
+    }, []);
 
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this campaign?')) {
             try {
                 const res = await fetch(`/api/campaigns/${id}`, {
                     method: 'DELETE',
-                    headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) throw new Error('Failed to delete campaign');
                 toast.success('Campaign deleted');
@@ -49,7 +46,7 @@ const CampaignsAdmin = () => {
 
     const handleApprove = async (id) => {
         try {
-            const res = await fetch(`/api/campaigns/${id}/approve`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch(`/api/campaigns/${id}/approve`, { method: 'POST' });
             if (!res.ok) throw new Error('Failed to approve campaign');
             toast.success('Campaign approved');
             setCampaigns(campaigns => campaigns.map(c => c.id === id ? { ...c, status: 'approved' } : c));
@@ -59,7 +56,7 @@ const CampaignsAdmin = () => {
     };
     const handleReject = async (id) => {
         try {
-            const res = await fetch(`/api/campaigns/${id}/reject`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch(`/api/campaigns/${id}/reject`, { method: 'POST' });
             if (!res.ok) throw new Error('Failed to reject campaign');
             toast.success('Campaign rejected');
             setCampaigns(campaigns => campaigns.map(c => c.id === id ? { ...c, status: 'rejected' } : c));
@@ -96,7 +93,6 @@ const CampaignsAdmin = () => {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     ...editForm,

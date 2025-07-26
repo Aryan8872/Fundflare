@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import MainLayout from '../layout/MainLayout';
 import CampaignsAdmin from '../pages/admin/CampaignsAdmin';
+import LogsAdmin from '../pages/admin/LogsAdmin';
 import PayoutsAdmin from '../pages/admin/PayoutsAdmin';
 import UsersAdmin from '../pages/admin/UsersAdmin';
 import AdminDashboard from '../pages/AdminDashboard';
@@ -20,6 +21,7 @@ import UserDashboard from '../pages/UserDashboard';
 
 const AdminRoute = ({ children }) => {
     const { user } = useAuthContext();
+    if (user === undefined) return <div>Loading...</div>;
     if (!user || user.role !== 'ADMIN') return <Navigate to="/" />;
     return children;
 };
@@ -41,6 +43,7 @@ const Router = () => (
             <Route path="/admin/users" element={<AdminRoute><UsersAdmin /></AdminRoute>} />
             <Route path="/admin/campaigns" element={<AdminRoute><CampaignsAdmin /></AdminRoute>} />
             <Route path="/admin/payouts" element={<AdminRoute><PayoutsAdmin /></AdminRoute>} />
+            <Route path="/admin/logs" element={<AdminRoute><LogsAdmin /></AdminRoute>} />
             <Route path="/create-campaign" element={<CreateCampaign />} />
             <Route path="*" element={<Navigate to="/" />} />
         </Route>

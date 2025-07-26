@@ -1,12 +1,16 @@
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from "./contexts/AuthContext";
 import Router from "./routes/Router";
 
 const App = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="bg-bodyBgColor">
-        <Router />
+        <AuthProvider>
+          <Router />
+
+        </AuthProvider>
       </main>
       <ToastContainer
         position="top-right"

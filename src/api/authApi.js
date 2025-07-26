@@ -4,13 +4,7 @@ export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: fetchBaseQuery({
         baseUrl: 'http://localhost:5000/api',
-        prepareHeaders: (headers, { getState }) => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                headers.set('authorization', `Bearer ${token}`);
-            }
-            return headers;
-        },
+        credentials: 'include',
     }),
     endpoints: (builder) => ({
         login: builder.mutation({
@@ -20,9 +14,8 @@ export const authApi = createApi({
                 body: credentials,
             }),
             transformResponse: (response) => {
-                // Store user and token in localStorage
+                // Store user in localStorage if needed
                 localStorage.setItem('user', JSON.stringify(response.user));
-                localStorage.setItem('token', response.token);
                 return response;
             },
         }),
@@ -41,12 +34,20 @@ export const authApi = createApi({
             transformResponse: () => {
                 // Clear localStorage
                 localStorage.removeItem('user');
-                localStorage.removeItem('token');
                 return { success: true };
             },
         }),
     }),
 });
+
+export const getCurrentUser = async () => {
+    const res = await fetch('http://localhost:5000/api/auth/me', {
+        credentials: 'include'
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.user;
+};
 
 export const {
     useLoginMutation,

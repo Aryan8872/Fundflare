@@ -1,9 +1,13 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import csurf from 'csurf';
 import dotenv from 'dotenv';
 import express from 'express';
 import session from 'express-session';
+import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { handleStripeWebhook } from './controllers/donationController.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import routes from './routes/index.js';
 
@@ -15,6 +19,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use(cors({ origin: true, credentials: true }));
+
+// Register Stripe webhook route BEFORE body parsers
+app.post(
+    '/api/webhooks/stripe',
+    express.raw({ type: 'application/json' }),
+    handleStripeWebhook
+);
 
 // Increase payload limits for file uploads and large JSON data
 app.use(express.json({ limit: '50mb' }));
@@ -29,6 +40,19 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false, httpOnly: true, maxAge: 1000 * 60 * 60 * 24 },
 }));
+
+app.use(cookieParser());
+
+app.use(helmet());
+
+// CSRF protection for state-changing routes
+app.use(['/api/campaigns', '/api/donations', '/api/auth/logout', '/api/auth/register'], csurf({ cookie: true }));
+
+// CSRF error handler
+app.use((err, req, res, next) => {
+    if (err.code !== 'EBADCSRFTOKEN') return next(err);
+    res.status(403).json({ message: 'Invalid CSRF token' });
+});
 
 // Debug middleware - handle large requests
 app.use((req, res, next) => {

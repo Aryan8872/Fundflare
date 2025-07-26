@@ -6,6 +6,7 @@ const links = [
   { to: '/admin/users', label: 'Users' },
   { to: '/admin/campaigns', label: 'Campaigns' },
   { to: '/admin/payouts', label: 'Payouts' },
+  { to: '/admin/logs', label: 'Logs' },
 ];
 
 const Sidebar = () => (

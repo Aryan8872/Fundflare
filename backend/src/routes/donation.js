@@ -11,5 +11,6 @@ router.use(authenticateToken);
 router.post('/', requireRole(['DONOR']), donationController.createDonation);
 router.get('/history', donationController.getDonationHistory);
 router.post('/recurring/simulate', requireRole(['ADMIN']), donationController.simulateRecurringDonations);
+router.post('/stripe-session', donationController.createStripeSession);
 
 export default router; 

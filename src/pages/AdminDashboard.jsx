@@ -6,6 +6,10 @@ const AdminDashboard = () => {
     const { user } = useAuthContext();
     const { data, isLoading, isError, error } = useAdminStats();
 
+    if (user === undefined) {
+        return <div className="flex justify-center items-center h-64">Loading...</div>;
+    }
+
     if (!user || user.role !== 'ADMIN') {
         return (
             <div className="max-w-2xl mx-auto py-16 text-center">

@@ -221,7 +221,12 @@ const emailTemplates = {
                 </div>
             </div>
         `
-    })
+    }),
+
+    otp: ({ otp }) => ({
+        subject: 'Your OTP Code',
+        html: `<p>Your OTP code is: <b>${otp}</b></p><p>This code will expire in 10 minutes.</p>`
+    }),
 };
 
 export const sendEmail = async (to, template, data) => {

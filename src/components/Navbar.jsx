@@ -18,33 +18,40 @@ const Navbar = () => {
     }, [user]);
 
     return (
-        <nav className="flex items-center w-full bg-gradient-to-tl from-[#0284c7] via-[#2563eb] to-[#1e3a8a] justify-between py-6 px-16">
-            <div className="flex items-center gap-48">
-                <Link to="/" className="navbar-logo" style={{ fontWeight: 700, fontSize: 24, letterSpacing: 1, color: "#fff", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontWeight: 900, fontSize: 28, marginRight: 8 }}>💡</span> Invsto.co
+        <nav style={{
+            width: '100%',
+            background: 'linear-gradient(90deg, #0a58f7 0%, #4f46e5 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '1.5rem 3rem',
+            boxShadow: '0 2px 8px rgba(10,88,247,0.10)'
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 48 }}>
+                <Link to="/" style={{ fontWeight: 900, fontSize: 28, color: '#fff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 900, fontSize: 32, marginRight: 8 }}>🌟</span> FundFlare
                 </Link>
-
-                <div className="flex items-center gap-16">
-                    <NavLink to="/invest" className="navbar-link" style={({ isActive }) => ({ color: isActive ? "#ffd600" : "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none" })}>Invest</NavLink>
-                    <NavLink to="/resources" className="navbar-link" style={({ isActive }) => ({ color: isActive ? "#ffd600" : "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none" })}>Resources</NavLink>
-                    <NavLink to="/company" className="navbar-link" style={({ isActive }) => ({ color: isActive ? "#ffd600" : "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none" })}>Company</NavLink>
-                    <NavLink to="/browse" className="navbar-link" style={({ isActive }) => ({ color: isActive ? "#ffd600" : "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none" })}>Browse Startup</NavLink>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+                    <NavLink to="/" style={({ isActive }) => ({ color: isActive ? '#ffd600' : '#fff', fontWeight: 500, fontSize: 16, textDecoration: 'none' })}>Home</NavLink>
+                    <NavLink to="/browse" style={({ isActive }) => ({ color: isActive ? '#ffd600' : '#fff', fontWeight: 500, fontSize: 16, textDecoration: 'none' })}>Browse</NavLink>
+                    <NavLink to="/resources" style={({ isActive }) => ({ color: isActive ? '#ffd600' : '#fff', fontWeight: 500, fontSize: 16, textDecoration: 'none' })}>Resources</NavLink>
+                    <NavLink to="/company" style={({ isActive }) => ({ color: isActive ? '#ffd600' : '#fff', fontWeight: 500, fontSize: 16, textDecoration: 'none' })}>Company</NavLink>
                 </div>
             </div>
-            <div className="navbar-auth" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 {user && (
-                    <div className="relative">
-                        <button onClick={() => setShowNotif(v => !v)} className="relative text-white focus:outline-none">
-                            <span role="img" aria-label="bell" className="text-2xl">🔔</span>
-                            {notifications.some(n => !n.read) && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>}
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => setShowNotif(v => !v)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, position: 'relative', cursor: 'pointer' }}>
+                            <span role="img" aria-label="bell">🔔</span>
+                            {notifications.some(n => !n.read) && <span style={{ position: 'absolute', top: 0, right: 0, width: 8, height: 8, background: '#ef4444', borderRadius: '50%' }}></span>}
                         </button>
                         {showNotif && (
-                            <div className="absolute right-0 mt-2 w-80 bg-white rounded shadow-lg z-50 max-h-96 overflow-y-auto">
-                                <div className="p-3 border-b font-semibold">Notifications</div>
+                            <div style={{ position: 'absolute', right: 0, marginTop: 8, width: 320, background: '#fff', borderRadius: 12, boxShadow: '0 4px 24px rgba(10,88,247,0.08)', zIndex: 50, maxHeight: 384, overflowY: 'auto' }}>
+                                <div style={{ padding: 12, borderBottom: '1px solid #e5e7eb', fontWeight: 700 }}>Notifications</div>
                                 {notifications.length === 0 ? (
-                                    <div className="p-3 text-gray-500">No notifications</div>
+                                    <div style={{ padding: 12, color: '#64748b' }}>No notifications</div>
                                 ) : notifications.map(n => (
-                                    <div key={n.id} className={`p-3 border-b last:border-b-0 ${n.read ? 'bg-gray-50' : 'bg-blue-50'}`}>{n.message}</div>
+                                    <div key={n.id} style={{ padding: 12, borderBottom: '1px solid #e5e7eb', background: n.read ? '#f1f5f9' : '#e0e7ff' }}>{n.message}</div>
                                 ))}
                             </div>
                         )}
@@ -52,21 +59,19 @@ const Navbar = () => {
                 )}
                 {!user && (
                     <>
-                        <NavLink to="/login" className="navbar-link" style={{ color: "#fff", fontWeight: 500, fontSize: 16, textDecoration: "none", marginRight: 8 }}>Log In</NavLink>
-                        <NavLink to="/register" className="navbar-link px-7 py-3" style={{ background: "#fff", color: "black", fontWeight: 700, fontSize: 16, borderRadius: 8, textDecoration: "none", boxShadow: "0 2px 8px rgba(10,88,247,0.10)" }}>Sign Up</NavLink>
+                        <NavLink to="/login" style={{ color: '#fff', fontWeight: 500, fontSize: 16, textDecoration: 'none', marginRight: 8 }}>Log In</NavLink>
+                        <NavLink to="/register" style={{ background: '#fff', color: '#0a58f7', fontWeight: 700, fontSize: 16, borderRadius: 8, textDecoration: 'none', boxShadow: '0 2px 8px rgba(10,88,247,0.10)', padding: '10px 28px' }}>Sign Up</NavLink>
                     </>
                 )}
                 {user && (
-                    <div className="relative group">
-                        <button className="flex items-center gap-2 focus:outline-none">
-                            <span className="font-semibold">{user.name || user.email}</span>
-                            <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
+                    <div style={{ position: 'relative' }}>
+                        <button style={{ background: 'none', border: 'none', color: '#fff', fontWeight: 700, fontSize: 16, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                            <span>{user.name || user.email}</span>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                         </button>
-                        <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden group-hover:block z-50">
-                            <NavLink to="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</NavLink>
-                            <button onClick={logout} className="block w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button>
+                        <div style={{ position: 'absolute', right: 0, marginTop: 8, width: 160, background: '#fff', borderRadius: 10, boxShadow: '0 2px 8px rgba(10,88,247,0.10)', zIndex: 50, display: 'none' /* implement dropdown logic if needed */ }}>
+                            <NavLink to="/profile" style={{ display: 'block', padding: '10px 16px', color: '#222', textDecoration: 'none', borderRadius: 8, fontWeight: 500 }}>Profile</NavLink>
+                            <button onClick={logout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', color: '#ef4444', fontWeight: 700, borderRadius: 8, cursor: 'pointer' }}>Logout</button>
                         </div>
                     </div>
                 )}
