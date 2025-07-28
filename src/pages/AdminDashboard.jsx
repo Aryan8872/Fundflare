@@ -1,6 +1,7 @@
 import { Calendar, CreditCard, DollarSign, Eye, Target, TrendingUp, Users } from 'lucide-react';
 import React from 'react';
 import Sidebar from '../components/admin/Sidebar';
+import UserLogs from '../components/admin/UserLogs';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useAdminStats } from '../hooks/useAdmin';
 
@@ -138,7 +139,6 @@ const AdminDashboard = () => {
                         <h2 className="text-2xl font-bold text-gray-900">Recent Donations</h2>
                         <button className="text-blue-600 hover:text-blue-700 font-medium">View All</button>
                     </div>
-
                     {recentDonations.length === 0 ? (
                         <div className="text-center py-12">
                             <DollarSign className="mx-auto text-gray-300 mb-4" size={48} />
@@ -187,6 +187,9 @@ const AdminDashboard = () => {
                         </div>
                     )}
                 </div>
+
+                {/* User Activity Logs */}
+                <UserLogs />
             </div>
         </div>
     );

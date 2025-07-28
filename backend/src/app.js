@@ -10,6 +10,9 @@ import { fileURLToPath } from 'url';
 import { handleStripeWebhook } from './controllers/donationController.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import routes from './routes/index.js';
+import { userLogMiddleware } from './middleware/userLog.js';
+// Log user activity to Postgres for all API requests
+app.use(userLogMiddleware);
 
 dotenv.config();
 
