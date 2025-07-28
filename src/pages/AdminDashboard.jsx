@@ -1,5 +1,4 @@
 import { Calendar, CreditCard, DollarSign, Eye, Target, TrendingUp, Users } from 'lucide-react';
-import React from 'react';
 import Sidebar from '../components/admin/Sidebar';
 import UserLogs from '../components/admin/UserLogs';
 import { useAuthContext } from '../contexts/AuthContext';

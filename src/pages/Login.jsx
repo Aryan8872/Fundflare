@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -24,12 +24,17 @@ const Login = () => {
                     body: JSON.stringify(form),
                     credentials: 'include',
                 });
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    throw new Error('Unexpected server response.');
+                }
                 if (!res.ok) throw new Error(data.message || 'Login failed. Please check your credentials.');
                 setStep(2);
                 toast.success('OTP has been sent to your email.');
             } catch (err) {
-                setError(err.message);
+                toast.error(err.message);
             } finally {
                 setIsLoading(false);
             }
@@ -41,13 +46,18 @@ const Login = () => {
                     body: JSON.stringify({ email: form.email, otp }),
                     credentials: 'include',
                 });
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    throw new Error('Unexpected server response.');
+                }
                 if (!res.ok) throw new Error(data.message || 'OTP verification failed.');
                 login(data.user);
                 toast.success('Signed in successfully!');
                 navigate('/');
             } catch (err) {
-                setError(err.message);
+                toast.error(err.message);
             } finally {
                 setIsLoading(false);
             }
@@ -69,7 +79,6 @@ const Login = () => {
                         {isLoading ? (step === 1 ? 'Logging in...' : 'Verifying OTP...') : (step === 1 ? 'Log In' : 'Verify OTP')}
                     </button>
                 </form>
-                {error && <div style={{ color: 'red', marginTop: 16, textAlign: 'center' }}>{error}</div>}
                 <div style={{ marginTop: 16, textAlign: 'center' }}>
                     <span style={{ color: '#263238' }}>Don't have an account? </span>
                     <Link to="/register" style={{ color: '#0a58f7', fontWeight: 700 }}>Sign Up</Link>

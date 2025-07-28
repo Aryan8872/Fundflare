@@ -6,6 +6,7 @@ model UserLog {
   method    String
   createdAt DateTime @default(now())
 }
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -34,106 +35,106 @@ enum PayoutStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole @default(DONOR)
-  status    String   @default("active") // active, deactivated
-  campaigns Campaign[] @relation("CampaignCreator")
-  donations Donation[] @relation("DonationDonor")
+  id                 String              @id @default(uuid())
+  name               String
+  email              String              @unique
+  password           String
+  role               UserRole            @default(DONOR)
+  status             String              @default("active") // active, deactivated
+  campaigns          Campaign[]          @relation("CampaignCreator")
+  donations          Donation[]          @relation("DonationDonor")
   recurringDonations RecurringDonation[] @relation("RecurringDonor")
-  favorites Campaign[] @relation("UserFavorites")
-  notifications Notification[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  otpHash   String?
-  otpExpiry DateTime?
+  favorites          Campaign[]          @relation("UserFavorites")
+  notifications      Notification[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  otpHash            String?
+  otpExpiry          DateTime?
 }
 
 model Campaign {
-  id            String   @id @default(uuid())
-  creatorId     String
-  title         String
-  description   String
-  category      String
-  goalAmount    Float
-  currentAmount Float   @default(0)
-  duration      Int     // in days
-  coverImage    String?
-  media         String[] // URLs for images/videos
-  status        String  @default("pending") // pending, approved, rejected
-  approvedBy    String?
-  approvedAt    DateTime?
-  donations     Donation[]
+  id                 String              @id @default(uuid())
+  creatorId          String
+  title              String
+  description        String
+  category           String
+  goalAmount         Float
+  currentAmount      Float               @default(0)
+  duration           Int // in days
+  coverImage         String?
+  media              String[] // URLs for images/videos
+  status             String              @default("pending") // pending, approved, rejected
+  approvedBy         String?
+  approvedAt         DateTime?
+  donations          Donation[]
   recurringDonations RecurringDonation[]
-  payoutRequests PayoutRequest[]
-  creator       User    @relation("CampaignCreator", fields: [creatorId], references: [id])
-  favoritedBy   User[]  @relation("UserFavorites")
-  updates       CampaignUpdate[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  payoutRequests     PayoutRequest[]
+  creator            User                @relation("CampaignCreator", fields: [creatorId], references: [id])
+  favoritedBy        User[]              @relation("UserFavorites")
+  updates            CampaignUpdate[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 model Donation {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   donorId     String?
   guestEmail  String?
   campaignId  String
   amount      Float
-  date        DateTime @default(now())
+  date        DateTime     @default(now())
   type        DonationType
-  donor       User?    @relation("DonationDonor", fields: [donorId], references: [id])
-  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  donor       User?        @relation("DonationDonor", fields: [donorId], references: [id])
+  campaign    Campaign     @relation(fields: [campaignId], references: [id])
   transaction Transaction?
 }
 
 model RecurringDonation {
-  id              String   @id @default(uuid())
-  donorId         String
-  campaignId      String
-  amount          Float
+  id               String   @id @default(uuid())
+  donorId          String
+  campaignId       String
+  amount           Float
   nextDonationDate DateTime
-  interval        String   // e.g., "monthly"
-  donor           User     @relation("RecurringDonor", fields: [donorId], references: [id])
-  campaign        Campaign @relation(fields: [campaignId], references: [id])
+  interval         String // e.g., "monthly"
+  donor            User     @relation("RecurringDonor", fields: [donorId], references: [id])
+  campaign         Campaign @relation(fields: [campaignId], references: [id])
 }
 
 model PayoutRequest {
-  id            String   @id @default(uuid())
-  campaignId    String
-  amount        Float
-  status        PayoutStatus @default(PENDING)
-  requestedAt   DateTime @default(now())
-  reviewedAt    DateTime?
-  campaign      Campaign @relation(fields: [campaignId], references: [id])
+  id          String       @id @default(uuid())
+  campaignId  String
+  amount      Float
+  status      PayoutStatus @default(PENDING)
+  requestedAt DateTime     @default(now())
+  reviewedAt  DateTime?
+  campaign    Campaign     @relation(fields: [campaignId], references: [id])
 }
 
 model Transaction {
-  id          String   @id @default(uuid())
-  donationId  String   @unique
-  paymentId   String
-  provider    String // Stripe, PayPal, etc.
-  status      String // success, failed
-  amount      Float
-  createdAt   DateTime @default(now())
-  donation    Donation @relation(fields: [donationId], references: [id])
+  id         String   @id @default(uuid())
+  donationId String   @unique
+  paymentId  String
+  provider   String // Stripe, PayPal, etc.
+  status     String // success, failed
+  amount     Float
+  createdAt  DateTime @default(now())
+  donation   Donation @relation(fields: [donationId], references: [id])
 }
 
 model CampaignUpdate {
-  id          String   @id @default(uuid())
-  campaignId  String
-  content     String
-  createdAt   DateTime @default(now())
-  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  id         String   @id @default(uuid())
+  campaignId String
+  content    String
+  createdAt  DateTime @default(now())
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
 }
 
 model Notification {
-  id          String   @id @default(uuid())
-  userId      String
-  type        String
-  message     String
-  read        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
-} 
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}

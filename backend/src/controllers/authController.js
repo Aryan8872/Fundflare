@@ -20,7 +20,9 @@ const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '6LeIxAcTAAAAAGG-vF
 export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 5, // max 5 login requests per IP per window (stricter for security)
-    message: 'Too many login attempts from this IP, try again later.'
+    handler: (req, res) => {
+        res.status(429).json({ status: 'error', message: 'Too many login attempts from this IP, try again later.' });
+    }
 });
 
 const signupSchema = z.object({

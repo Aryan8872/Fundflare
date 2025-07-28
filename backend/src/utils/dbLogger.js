@@ -10,17 +10,17 @@ const prisma = new PrismaClient();
  * @param {string} param0.method - HTTP method
  */
 export async function logUserActivityToDb({ email, username, url, method }) {
-  try {
-    await prisma.userLog.create({
-      data: {
-        email,
-        username,
-        url,
-        method,
-      },
-    });
-  } catch (err) {
-    // Optionally log to file if DB fails
-    // console.error('Failed to log user activity to DB:', err);
-  }
+    try {
+        await prisma.userLog.create({
+            data: {
+                email,
+                username,
+                url,
+                method,
+            },
+        });
+    } catch (err) {
+        // Optionally log to file if DB fails
+        // console.error('Failed to log user activity to DB:', err);
+    }
 }

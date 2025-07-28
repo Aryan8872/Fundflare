@@ -8,11 +8,10 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleStripeWebhook } from './controllers/donationController.js';
+import { userLogMiddleware } from './middleware/userLog.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import routes from './routes/index.js';
-import { userLogMiddleware } from './middleware/userLog.js';
 // Log user activity to Postgres for all API requests
-app.use(userLogMiddleware);
 
 dotenv.config();
 
@@ -20,6 +19,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+app.use(userLogMiddleware);
 
 app.use(cors({
     origin: 'http://localhost:5173',
