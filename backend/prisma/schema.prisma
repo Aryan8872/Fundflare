@@ -31,6 +31,7 @@ model User {
   email     String   @unique
   password  String
   role      UserRole @default(DONOR)
+  status    String   @default("active") // active, deactivated
   campaigns Campaign[] @relation("CampaignCreator")
   donations Donation[] @relation("DonationDonor")
   recurringDonations RecurringDonation[] @relation("RecurringDonor")

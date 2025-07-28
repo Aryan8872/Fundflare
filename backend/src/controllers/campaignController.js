@@ -1,6 +1,10 @@
+import { PrismaClient } from '@prisma/client';
 import * as campaignService from '../services/campaignService.js';
 import catchAsync from '../utils/catchAsync.js';
+import logger from '../utils/logger.js';
 import { createCampaignSchema, updateCampaignSchema } from '../validation/campaignValidation.js';
+
+const prisma = new PrismaClient();
 
 export const getAllCampaigns = catchAsync(async (req, res) => {
     const { search, category } = req.query;
@@ -76,27 +80,87 @@ export const updateCampaign = catchAsync(async (req, res) => {
     res.json({ campaign: updated });
 });
 
-export const adminUpdateCampaign = catchAsync(async (req, res) => {
-    if (!req.user || req.user.role !== 'ADMIN') throw { status: 403, message: 'Only admins can update campaigns' };
-    const { id } = req.params;
-    const data = req.body;
-    // Only allow fields that exist in the Prisma Campaign model
-    const allowedFields = [
-        'title', 'description', 'category', 'goalAmount', 'duration', 'coverImage', 'media', 'status', 'approvedBy', 'approvedAt', 'currentAmount', 'creatorId'
-    ];
-    const filteredData = {};
-    for (const key of allowedFields) {
-        if (data[key] !== undefined) filteredData[key] = data[key];
+export const adminUpdateCampaign = async (req, res) => {
+    try {
+        if (!req.user || req.user.role !== 'ADMIN') {
+            return res.status(403).json({ status: 'error', message: 'Insufficient permissions' });
+        }
+        const { id } = req.params;
+        const updateData = req.body;
+        const campaign = await prisma.campaign.update({
+            where: { id },
+            data: updateData,
+        });
+        logger.info(`Admin ${req.user.email} updated campaign ${id}`);
+        res.json({ status: 'success', campaign });
+    } catch (err) {
+        logger.error('Error updating campaign as admin:', err);
+        res.status(500).json({ status: 'error', message: 'Failed to update campaign' });
     }
-    const updated = await campaignService.updateCampaign(id, filteredData);
-    res.json({ campaign: updated });
-});
+};
 
 export const deleteCampaign = catchAsync(async (req, res) => {
     const { id } = req.params;
-    if (!req.user || req.user.role !== 'CREATOR') throw { status: 403, message: 'Only campaign creators can delete campaigns' };
+    if (!req.user) throw { status: 401, message: 'Authentication required' };
+    
     const campaign = await campaignService.getCampaignById(id);
-    if (!campaign || campaign.creatorId !== req.user.id) throw { status: 403, message: 'Not authorized' };
-    await campaignService.deleteCampaign(id);
-    res.json({ message: 'Campaign deleted successfully' });
-}); 
+    if (!campaign) throw { status: 404, message: 'Campaign not found' };
+    
+    // Admins can delete any campaign, creators can only delete their own
+    if (req.user.role === 'ADMIN') {
+        // Admin can delete any campaign
+        await deleteCampaignWithRelatedData(id);
+        logger.info(`Admin ${req.user.email} deleted campaign ${id}`);
+        res.json({ message: 'Campaign deleted successfully' });
+    } else if (req.user.role === 'CREATOR') {
+        // Creator can only delete their own campaign
+        if (campaign.creatorId !== req.user.id) {
+            throw { status: 403, message: 'You can only delete your own campaigns' };
+        }
+        await deleteCampaignWithRelatedData(id);
+        logger.info(`Creator ${req.user.email} deleted their campaign ${id}`);
+        res.json({ message: 'Campaign deleted successfully' });
+    } else {
+        throw { status: 403, message: 'Insufficient permissions to delete campaigns' };
+    }
+});
+
+// Helper function to delete campaign and all related data
+async function deleteCampaignWithRelatedData(campaignId) {
+    // Delete in order to respect foreign key constraints
+    // 1. Delete transactions (if any)
+    await prisma.transaction.deleteMany({
+        where: { donation: { campaignId } }
+    });
+    
+    // 2. Delete donations
+    await prisma.donation.deleteMany({
+        where: { campaignId }
+    });
+    
+    // 3. Delete recurring donations
+    await prisma.recurringDonation.deleteMany({
+        where: { campaignId }
+    });
+    
+    // 4. Delete payout requests
+    await prisma.payoutRequest.deleteMany({
+        where: { campaignId }
+    });
+    
+    // 5. Delete campaign updates
+    await prisma.campaignUpdate.deleteMany({
+        where: { campaignId }
+    });
+    
+    // 6. Delete campaign favorites (many-to-many relationship)
+    await prisma.campaign.update({
+        where: { id: campaignId },
+        data: { favoritedBy: { set: [] } }
+    });
+    
+    // 7. Finally delete the campaign
+    await prisma.campaign.delete({
+        where: { id: campaignId }
+    });
+} 

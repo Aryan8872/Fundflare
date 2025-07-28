@@ -1,185 +1,217 @@
+import { ArrowRight, Award, Globe, Heart, Shield, Star, Target, Users } from 'lucide-react';
 import React from 'react';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaStar } from 'react-icons/fa';
 
 const About = () => {
+    const stats = [
+        { label: 'Total Raised', value: '$2.4M+', icon: Heart },
+        { label: 'Active Campaigns', value: '150+', icon: Target },
+        { label: 'Happy Donors', value: '10K+', icon: Users },
+        { label: 'Success Rate', value: '94%', icon: Award }
+    ];
+
+    const values = [
+        {
+            title: 'Transparency',
+            description: 'We believe in complete transparency in all our operations. Every donation is tracked and reported.',
+            icon: Shield,
+            color: 'blue'
+        },
+        {
+            title: 'Community Impact',
+            description: 'Our platform connects donors with causes that create real, measurable impact in communities.',
+            icon: Globe,
+            color: 'green'
+        },
+        {
+            title: 'Trust & Security',
+            description: 'Your security is our priority. We use industry-leading encryption and security measures.',
+            icon: Star,
+            color: 'purple'
+        }
+    ];
+
+    const team = [
+        {
+            name: 'Sarah Johnson',
+            role: 'CEO & Founder',
+            image: '/public/assets/images/hero_bg.png',
+            bio: 'Passionate about connecting people with causes that matter.'
+        },
+        {
+            name: 'Michael Chen',
+            role: 'CTO',
+            image: '/public/assets/images/hero_bg.png',
+            bio: 'Building secure and scalable technology solutions.'
+        },
+        {
+            name: 'Emily Rodriguez',
+            role: 'Head of Operations',
+            image: '/public/assets/images/hero_bg.png',
+            bio: 'Ensuring smooth operations and donor satisfaction.'
+        }
+    ];
+
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-green-600 to-green-800 text-white py-20">
-                <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-6xl font-PoppinsBold mb-6">About GCamping</h1>
-                    <p className="text-xl md:text-2xl font-PoppinsRegular max-w-3xl mx-auto">
-                        Your gateway to unforgettable outdoor adventures and nature experiences
-                    </p>
+            <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+                            About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">FundFlare</span>
+                        </h1>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                            We're on a mission to make fundraising accessible, transparent, and impactful for everyone.
+                            Our platform connects generous donors with meaningful causes that create lasting change.
+                        </p>
+                        <div className="inline-flex items-center gap-2 text-blue-600 font-semibold">
+                            <span>Learn more about our story</span>
+                            <ArrowRight size={20} />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Main Content */}
-            <div className="container mx-auto px-4 py-16">
-                {/* Story Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-                    <div>
-                        <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-6">Our Story</h2>
-                        <p className="text-lg text-gray-600 font-PoppinsRegular mb-6">
-                            Founded with a passion for connecting people with nature, GCamping has been providing 
-                            exceptional camping experiences since 2020. We believe that everyone deserves to experience 
-                            the beauty and tranquility of the great outdoors.
-                        </p>
-                        <p className="text-lg text-gray-600 font-PoppinsRegular mb-6">
-                            Our carefully curated camping sites offer the perfect blend of adventure and comfort, 
-                            allowing you to create lasting memories with family and friends while immersing yourself 
-                            in nature's wonders.
-                        </p>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <FaStar className="text-yellow-500 text-xl" />
-                                <span className="font-PoppinsBold text-gray-900">4.8/5</span>
+            {/* Stats Section */}
+            <section className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        {stats.map((stat, index) => {
+                            const IconComponent = stat.icon;
+                            return (
+                                <div key={index} className="text-center">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <IconComponent className="text-white" size={28} />
+                                    </div>
+                                    <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                                    <div className="text-gray-600">{stat.label}</div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* Mission Section */}
+            <section className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                                Our Mission
+                            </h2>
+                            <p className="text-lg text-gray-600 mb-6">
+                                FundFlare was born from a simple belief: everyone deserves the opportunity to make a difference.
+                                We've created a platform that removes barriers between generous donors and impactful causes.
+                            </p>
+                            <p className="text-lg text-gray-600 mb-8">
+                                Whether you're supporting medical research, educational initiatives, or community projects,
+                                we ensure your contributions reach their intended destination with full transparency and accountability.
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <Heart className="text-green-600" size={24} />
+                                </div>
+                                <div>
+                                    <div className="font-semibold text-gray-900">Trusted by 10,000+ donors</div>
+                                    <div className="text-sm text-gray-600">Join our growing community</div>
+                                </div>
                             </div>
-                            <span className="text-gray-600">•</span>
-                            <span className="text-gray-600 font-PoppinsMedium">1000+ Happy Campers</span>
                         </div>
-                    </div>
-                    <div className="relative">
-                        <img 
-                            src="/assets/images/campingtentimage.png" 
-                            alt="Camping Experience" 
-                            className="rounded-2xl shadow-2xl"
-                        />
-                        <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4">
-                            <div className="text-center">
-                                <div className="text-2xl font-PoppinsBold text-primaryGreen">50+</div>
-                                <div className="text-sm text-gray-600 font-PoppinsMedium">Camping Sites</div>
-                            </div>
+                        <div className="relative">
+                            <img
+                                src="/public/assets/images/hero_bg.png"
+                                alt="Our mission"
+                                className="rounded-2xl shadow-2xl"
+                            />
+                            <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl opacity-20"></div>
+                            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl opacity-20"></div>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                {/* Mission & Values */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-                    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                        <div className="w-16 h-16 bg-primaryGreen/10 rounded-xl flex items-center justify-center mb-6">
-                            <FaMapMarkerAlt className="text-primaryGreen text-2xl" />
-                        </div>
-                        <h3 className="text-xl font-PoppinsBold text-gray-900 mb-4">Our Mission</h3>
-                        <p className="text-gray-600 font-PoppinsRegular">
-                            To provide accessible, sustainable, and memorable camping experiences that connect 
-                            people with nature and create lasting bonds with the outdoors.
+            {/* Values Section */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                            Our Values
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            These core values guide everything we do and shape the way we serve our community.
                         </p>
                     </div>
-                    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                        <div className="w-16 h-16 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6">
-                            <FaStar className="text-blue-500 text-2xl" />
-                        </div>
-                        <h3 className="text-xl font-PoppinsBold text-gray-900 mb-4">Quality First</h3>
-                        <p className="text-gray-600 font-PoppinsRegular">
-                            We maintain the highest standards in our camping facilities, ensuring every guest 
-                            enjoys a safe, comfortable, and exceptional outdoor experience.
-                        </p>
-                    </div>
-                    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                        <div className="w-16 h-16 bg-green-500/10 rounded-xl flex items-center justify-center mb-6">
-                            <FaClock className="text-green-500 text-2xl" />
-                        </div>
-                        <h3 className="text-xl font-PoppinsBold text-gray-900 mb-4">24/7 Support</h3>
-                        <p className="text-gray-600 font-PoppinsRegular">
-                            Our dedicated team is available round the clock to ensure your camping experience 
-                            is smooth, safe, and enjoyable from start to finish.
-                        </p>
-                    </div>
-                </div>
 
-                {/* Team Section */}
-                <div className="text-center mb-20">
-                    <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-6">Meet Our Team</h2>
-                    <p className="text-lg text-gray-600 font-PoppinsRegular max-w-2xl mx-auto mb-12">
-                        Our passionate team of outdoor enthusiasts and hospitality professionals work together 
-                        to create the perfect camping experience for every guest.
-                    </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                            <img 
-                                src="/assets/images/glampimage.png" 
-                                alt="Team Member" 
-                                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                            />
-                            <h3 className="text-xl font-PoppinsBold text-gray-900 mb-2">Sarah Johnson</h3>
-                            <p className="text-primaryGreen font-PoppinsMedium">Founder & CEO</p>
-                        </div>
-                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                            <img 
-                                src="/assets/images/trailerimage.png" 
-                                alt="Team Member" 
-                                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                            />
-                            <h3 className="text-xl font-PoppinsBold text-gray-900 mb-2">Mike Chen</h3>
-                            <p className="text-primaryGreen font-PoppinsMedium">Operations Manager</p>
-                        </div>
-                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                            <img 
-                                src="/assets/images/campingtentimage.png" 
-                                alt="Team Member" 
-                                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                            />
-                            <h3 className="text-xl font-PoppinsBold text-gray-900 mb-2">Emma Davis</h3>
-                            <p className="text-primaryGreen font-PoppinsMedium">Customer Experience</p>
-                        </div>
-                    </div>
-                </div>
+                        {values.map((value, index) => {
+                            const IconComponent = value.icon;
+                            const colorClasses = {
+                                blue: 'bg-blue-100 text-blue-600',
+                                green: 'bg-green-100 text-green-600',
+                                purple: 'bg-purple-100 text-purple-600'
+                            };
 
-                {/* Contact Section */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                    <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-8 text-center">Get In Touch</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <h3 className="text-xl font-PoppinsBold text-gray-900 mb-4">Contact Information</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <FaMapMarkerAlt className="text-primaryGreen text-xl" />
-                                    <div>
-                                        <p className="font-PoppinsMedium text-gray-900">123 Nature Trail</p>
-                                        <p className="text-gray-600">Wilderness Valley, CA 90210</p>
+                            return (
+                                <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+                                    <div className={`w-16 h-16 ${colorClasses[value.color]} rounded-2xl flex items-center justify-center mb-6`}>
+                                        <IconComponent size={28} />
                                     </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-4">{value.title}</h3>
+                                    <p className="text-gray-600 leading-relaxed">{value.description}</p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <FaPhone className="text-primaryGreen text-xl" />
-                                    <div>
-                                        <p className="font-PoppinsMedium text-gray-900">+1 (555) 123-4567</p>
-                                        <p className="text-gray-600">Available 24/7</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <FaEnvelope className="text-primaryGreen text-xl" />
-                                    <div>
-                                        <p className="font-PoppinsMedium text-gray-900">hello@gcamping.com</p>
-                                        <p className="text-gray-600">We'll respond within 2 hours</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-PoppinsBold text-gray-900 mb-4">Business Hours</h3>
-                            <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="font-PoppinsMedium">Monday - Friday</span>
-                                    <span className="text-gray-600">9:00 AM - 6:00 PM</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-PoppinsMedium">Saturday</span>
-                                    <span className="text-gray-600">10:00 AM - 4:00 PM</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-PoppinsMedium">Sunday</span>
-                                    <span className="text-gray-600">10:00 AM - 4:00 PM</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-PoppinsMedium text-primaryGreen">Emergency</span>
-                                    <span className="text-primaryGreen font-PoppinsMedium">24/7 Available</span>
-                                </div>
-                            </div>
-                        </div>
+                            );
+                        })}
                     </div>
                 </div>
-            </div>
+            </section>
+
+            {/* Team Section */}
+            <section className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                            Meet Our Team
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            The passionate individuals behind FundFlare who are dedicated to making a difference.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {team.map((member, index) => (
+                            <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+                                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Users className="text-white" size={32} />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                                <div className="text-blue-600 font-medium mb-4">{member.role}</div>
+                                <p className="text-gray-600">{member.bio}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
+                        Ready to Make a Difference?
+                    </h2>
+                    <p className="text-xl text-blue-100 mb-8">
+                        Join thousands of donors who are already making an impact through FundFlare.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
+                            Browse Campaigns
+                        </button>
+                        <button className="px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                            Start Your Campaign
+                        </button>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };

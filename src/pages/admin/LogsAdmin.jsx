@@ -1,4 +1,6 @@
+import { AlertCircle, AlertTriangle, ArrowDown, ArrowUp, Clock, FileText, Filter, Info } from 'lucide-react';
 import React from 'react';
+import Sidebar from '../../components/admin/Sidebar';
 import { useAuthContext } from '../../contexts/AuthContext';
 
 const LogsAdmin = () => {
@@ -7,6 +9,8 @@ const LogsAdmin = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [filter, setFilter] = React.useState('all');
+  const [sortKey, setSortKey] = React.useState('timestamp');
+  const [sortDir, setSortDir] = React.useState('desc');
 
   React.useEffect(() => {
     const fetchLogs = async () => {
@@ -28,7 +32,22 @@ const LogsAdmin = () => {
 
   // Parse log entries to extract timestamp, level, and message
   const parseLogEntry = (logLine) => {
-    // More robust regex to handle the actual log format
+    // Parse user activity logs format: timestamp [USER_ACTIVITY]: User userId performed action - message (details)
+    const userActivityMatch = logLine.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\s+\[USER_ACTIVITY\]:\s*User\s+([^\s]+)\s+performed\s+([^-]+)\s+-\s*(.+?)(?:\s+\((.+)\))?$/);
+
+    if (userActivityMatch) {
+      return {
+        timestamp: userActivityMatch[1],
+        level: 'USER_ACTIVITY',
+        userId: userActivityMatch[2],
+        action: userActivityMatch[3].trim(),
+        message: userActivityMatch[4].trim(),
+        details: userActivityMatch[5] || null,
+        raw: logLine
+      };
+    }
+
+    // Fallback for other log formats
     const logMatch = logLine.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\s+\[(INFO|ERROR|WARN|DEBUG)\]:\s*(.+)$/);
 
     if (logMatch) {
@@ -40,21 +59,9 @@ const LogsAdmin = () => {
       };
     }
 
-    // If the above doesn't match, try a simpler approach
-    const simpleMatch = logLine.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\s*\[(INFO|ERROR|WARN|DEBUG)\]:\s*(.+)$/);
-
-    if (simpleMatch) {
-      return {
-        timestamp: simpleMatch[1],
-        level: simpleMatch[2],
-        message: simpleMatch[3],
-        raw: logLine
-      };
-    }
-
     // If still no match, try to extract timestamp and level manually
     const timestampMatch = logLine.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)/);
-    const levelMatch = logLine.match(/\[(INFO|ERROR|WARN|DEBUG)\]/);
+    const levelMatch = logLine.match(/\[(INFO|ERROR|WARN|DEBUG|USER_ACTIVITY)\]/);
 
     if (timestampMatch && levelMatch) {
       // Find the position of the level to extract the message
@@ -83,133 +90,279 @@ const LogsAdmin = () => {
 
   // Filter logs based on selected filter
   const getFilteredLogs = () => {
-    if (filter === 'all') return parsedLogs;
+    if (filter === 'all') return parsedLogs.filter(log => log.level === 'USER_ACTIVITY');
 
     return parsedLogs.filter(log => {
+      // Only show user activity logs
+      if (log.level !== 'USER_ACTIVITY') return false;
+
+      const action = log.action?.toLowerCase() || '';
       const message = log.message.toLowerCase();
 
       switch (filter) {
         case 'user-activity':
-          return message.includes('user registered') ||
-            message.includes('user login') ||
-            message.includes('otp sent') ||
-            message.includes('otp verified') ||
-            message.includes('donation created') ||
-            message.includes('campaign') ||
-            message.includes('payout');
+          return action.includes('registration') ||
+            action.includes('login') ||
+            action.includes('logout') ||
+            action.includes('donation') ||
+            action.includes('campaign') ||
+            action.includes('profile') ||
+            action.includes('admin');
         case 'donations':
-          return message.includes('donation created') ||
-            message.includes('stripe session') ||
-            message.includes('webhook');
+          return action.includes('donation');
+        case 'registrations':
+          return action.includes('registration');
+        case 'logins':
+          return action.includes('login') || action.includes('logout');
+        case 'admin-actions':
+          return action.includes('admin');
         case 'errors':
           return log.level === 'ERROR';
-        case 'registrations':
-          return message.includes('user registered');
-        case 'logins':
-          return message.includes('user login') || message.includes('otp');
         default:
           return true;
       }
     });
   };
 
-  const filteredLogs = getFilteredLogs();
+  // Sorting logic
+  const getSortedLogs = (logs) => {
+    const sorted = [...logs].sort((a, b) => {
+      let aVal = a[sortKey] || '';
+      let bVal = b[sortKey] || '';
+      if (sortKey === 'timestamp') {
+        aVal = aVal ? new Date(aVal).getTime() : 0;
+        bVal = bVal ? new Date(bVal).getTime() : 0;
+      } else {
+        aVal = aVal.toString().toLowerCase();
+        bVal = bVal.toString().toLowerCase();
+      }
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  };
 
-  if (user === undefined) return <div>Loading...</div>;
-  if (!user || user.role !== 'ADMIN') {
+  const filteredLogs = getSortedLogs(getFilteredLogs());
+
+  if (user === undefined) {
     return (
-      <div className="max-w-2xl mx-auto py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-        <p className="text-gray-600">You do not have permission to view this page.</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex justify-center items-center h-64">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
+  if (!user || user.role !== 'ADMIN') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto py-16 text-center">
+          <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+          <p className="text-gray-600">You do not have permission to view this page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getLevelIcon = (level) => {
+    switch (level) {
+      case 'ERROR': return <AlertCircle size={16} className="text-red-500" />;
+      case 'WARN': return <AlertTriangle size={16} className="text-yellow-500" />;
+      case 'DEBUG': return <Clock size={16} className="text-gray-500" />;
+      default: return <Info size={16} className="text-blue-500" />;
+    }
+  };
+
   const getLevelColor = (level) => {
     switch (level) {
-      case 'ERROR': return 'text-red-600 bg-red-50';
-      case 'WARN': return 'text-yellow-600 bg-yellow-50';
-      case 'DEBUG': return 'text-gray-600 bg-gray-50';
-      default: return 'text-green-600 bg-green-50';
+      case 'ERROR': return 'bg-red-50 text-red-700 border-red-200';
+      case 'WARN': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'DEBUG': return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-green-50 text-green-700 border-green-200';
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)', color: '#222', padding: '2rem 0' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px rgba(10,88,247,0.08)', padding: '2rem' }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 24, textAlign: 'center', color: '#0a58f7' }}>Activity Logs</h1>
-
-        {/* Filter Controls */}
-        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem', alignItems: 'center' }}>
-          <label style={{ fontWeight: 600, color: '#374151' }}>Filter:</label>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              border: '1px solid #d1d5db',
-              backgroundColor: '#fff',
-              fontSize: '14px',
-              fontWeight: 500
-            }}
-          >
-            <option value="all">All Logs</option>
-            <option value="user-activity">User Activity</option>
-            <option value="donations">Donations & Payments</option>
-            <option value="registrations">User Registrations</option>
-            <option value="logins">User Logins</option>
-            <option value="errors">Errors Only</option>
-          </select>
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="lg:ml-64 flex-1 p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Activity Logs</h1>
+          <p className="text-gray-600">Monitor system activity and track user actions</p>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>Loading logs...</div>
-        ) : error ? (
-          <div style={{ color: 'red', textAlign: 'center', padding: '2rem' }}>{error}</div>
-        ) : filteredLogs.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>No logs found for the selected filter.</div>
-        ) : (
-          <div style={{ maxHeight: 600, overflowY: 'auto', borderRadius: 12, border: '1px solid #e0e7ef' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f9fafb' }}>
-              <thead style={{ background: '#e0e7ff', position: 'sticky', top: 0 }}>
-                <tr>
-                  <th style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'left', borderBottom: '2px solid #cbd5e1' }}>Timestamp</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'left', borderBottom: '2px solid #cbd5e1' }}>Level</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'left', borderBottom: '2px solid #cbd5e1' }}>Message</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLogs.map((log, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
-                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: '12px', color: '#64748b' }}>
-                      {log.timestamp ? new Date(log.timestamp).toLocaleString() : '-'}
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        ...(log.level === 'ERROR' && { color: '#dc2626', backgroundColor: '#fef2f2' }),
-                        ...(log.level === 'WARN' && { color: '#d97706', backgroundColor: '#fffbeb' }),
-                        ...(log.level === 'DEBUG' && { color: '#6b7280', backgroundColor: '#f9fafb' }),
-                        ...(log.level === 'INFO' && { color: '#059669', backgroundColor: '#f0fdf4' })
-                      }}>
-                        {log.level}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: '13px', wordBreak: 'break-word' }}>
-                      {log.message}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Log Statistics - moved to top */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total User Activities</p>
+                <p className="text-2xl font-bold text-gray-900">{parsedLogs.filter(log => log.level === 'USER_ACTIVITY').length}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <FileText className="text-blue-600" size={24} />
+              </div>
+            </div>
           </div>
-        )}
 
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '14px', color: '#64748b' }}>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">User Registrations</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {parsedLogs.filter(log => log.level === 'USER_ACTIVITY' && log.action?.includes('REGISTRATION')).length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <Info className="text-green-600" size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Donations</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {parsedLogs.filter(log => log.level === 'USER_ACTIVITY' && log.action?.includes('DONATION')).length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <AlertTriangle className="text-yellow-600" size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Admin Actions</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {parsedLogs.filter(log => log.level === 'USER_ACTIVITY' && log.action?.includes('ADMIN')).length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <AlertCircle className="text-red-600" size={24} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Controls */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+          <div className="flex items-center gap-4">
+            <Filter className="text-gray-400" size={20} />
+            <label className="text-sm font-semibold text-gray-700">Filter Logs:</label>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All User Activities</option>
+              <option value="user-activity">All User Actions</option>
+              <option value="donations">Donations & Payments</option>
+              <option value="registrations">User Registrations</option>
+              <option value="logins">User Logins/Logouts</option>
+              <option value="admin-actions">Admin Actions</option>
+              <option value="errors">Errors Only</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Logs Table */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {loading ? (
+            <div className="flex justify-center items-center py-16">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Loading logs...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 text-red-600">{error}</div>
+          ) : filteredLogs.length === 0 ? (
+            <div className="text-center py-16">
+              <FileText className="mx-auto text-gray-300 mb-4" size={48} />
+              <p className="text-gray-600">No logs found for the selected filter.</p>
+            </div>
+          ) : (
+            <div className="max-h-[600px] overflow-y-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                  <tr>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-900 cursor-pointer select-none" onClick={() => {
+                      if (sortKey === 'timestamp') setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+                      setSortKey('timestamp');
+                    }}>
+                      Timestamp
+                      {sortKey === 'timestamp' && (sortDir === 'asc' ? <ArrowUp className="inline ml-1 w-4 h-4" /> : <ArrowDown className="inline ml-1 w-4 h-4" />)}
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-900 cursor-pointer select-none" onClick={() => {
+                      if (sortKey === 'userId') setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+                      setSortKey('userId');
+                    }}>
+                      User ID
+                      {sortKey === 'userId' && (sortDir === 'asc' ? <ArrowUp className="inline ml-1 w-4 h-4" /> : <ArrowDown className="inline ml-1 w-4 h-4" />)}
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-900 cursor-pointer select-none" onClick={() => {
+                      if (sortKey === 'action') setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+                      setSortKey('action');
+                    }}>
+                      Action
+                      {sortKey === 'action' && (sortDir === 'asc' ? <ArrowUp className="inline ml-1 w-4 h-4" /> : <ArrowDown className="inline ml-1 w-4 h-4" />)}
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-900 cursor-pointer select-none" onClick={() => {
+                      if (sortKey === 'message') setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+                      setSortKey('message');
+                    }}>
+                      Details
+                      {sortKey === 'message' && (sortDir === 'asc' ? <ArrowUp className="inline ml-1 w-4 h-4" /> : <ArrowDown className="inline ml-1 w-4 h-4" />)}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLogs.map((log, idx) => (
+                    <tr key={idx} className={`border-b border-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-2">
+                          <Clock size={14} className="text-gray-400" />
+                          <span className="font-mono text-sm text-gray-600">
+                            {log.timestamp ? new Date(log.timestamp).toLocaleString() : '-'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="font-mono text-sm text-gray-700">
+                          {log.userId || 'anonymous'}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-2">
+                          {getLevelIcon(log.level)}
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getLevelColor(log.level)}`}>
+                            {log.action || log.level}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-sm text-gray-700 break-words max-w-md">
+                          <div className="font-medium">{log.message}</div>
+                          {log.details && (
+                            <div className="text-xs text-gray-500 mt-1">{log.details}</div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Summary Stats */}
+        <div className="mt-6 text-center text-sm text-gray-500">
           Showing {filteredLogs.length} of {parsedLogs.length} log entries
         </div>
       </div>

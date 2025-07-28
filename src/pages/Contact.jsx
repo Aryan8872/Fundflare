@@ -1,235 +1,270 @@
+import { CheckCircle, Clock, Mail, MapPin, MessageSquare, Phone, Send, Users } from 'lucide-react';
 import React, { useState } from 'react';
-import { FaClock, FaEnvelope, FaMapMarkerAlt, FaPaperPlane, FaPhone } from 'react-icons/fa';
-import { toast } from 'react-toastify';
 
 const Contact = () => {
-    const [formData, setFormData] = useState({
+    const [form, setForm] = useState({
         name: '',
         email: '',
         subject: '',
         message: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const handleInputChange = (e) => {
+    const contactInfo = [
+        {
+            icon: Mail,
+            title: 'Email Us',
+            details: ['support@fundflare.com', 'info@fundflare.com'],
+            description: 'We typically respond within 2 hours'
+        },
+        {
+            icon: Phone,
+            title: 'Call Us',
+            details: ['+1 (555) 123-4567', '+1 (555) 987-6543'],
+            description: 'Available Monday to Friday, 9AM - 6PM EST'
+        },
+        {
+            icon: MapPin,
+            title: 'Visit Us',
+            details: ['123 Fundraising Ave', 'Suite 100, New York, NY 10001'],
+            description: 'Come say hello at our office'
+        }
+    ];
+
+    const faqs = [
+        {
+            question: 'How do I start a fundraising campaign?',
+            answer: 'Creating a campaign is easy! Simply sign up for an account, click "Start Your Campaign", and follow our step-by-step guide to set up your fundraising page.'
+        },
+        {
+            question: 'What fees does FundFlare charge?',
+            answer: 'We charge a small processing fee of 2.9% + $0.30 per donation to cover payment processing and platform maintenance costs.'
+        },
+        {
+            question: 'How long does it take to receive funds?',
+            answer: 'Funds are typically transferred to your account within 3-5 business days after your campaign ends or when you request a payout.'
+        },
+        {
+            question: 'Is my donation secure?',
+            answer: 'Absolutely! We use industry-leading encryption and security measures to protect all transactions and personal information.'
+        }
+    ];
+
+    const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-            toast.error('Please fill in all fields');
-            return;
-        }
+        setIsSubmitting(true);
 
         // Simulate form submission
-        toast.success('Message sent successfully! We\'ll get back to you soon.');
-        setFormData({
-            name: '',
-            email: '',
-            subject: '',
-            message: ''
-        });
+        setTimeout(() => {
+            setIsSubmitting(false);
+            setIsSubmitted(true);
+            setForm({ name: '', email: '', subject: '', message: '' });
+
+            // Reset success message after 5 seconds
+            setTimeout(() => setIsSubmitted(false), 5000);
+        }, 2000);
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-green-600 to-green-800 text-white py-20">
-                <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-6xl font-PoppinsBold mb-6">Contact Us</h1>
-                    <p className="text-xl md:text-2xl font-PoppinsRegular max-w-3xl mx-auto">
-                        Get in touch with our team for any questions or assistance
-                    </p>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="container mx-auto px-4 py-16">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Contact Information */}
-                    <div>
-                        <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-8">Get In Touch</h2>
-                        <p className="text-lg text-gray-600 font-PoppinsRegular mb-8">
-                            Have questions about our campaigns or need assistance with your donation?
-                            Our friendly team is here to help you plan the perfect fundraising adventure.
+            <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+                            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Touch</span>
+                        </h1>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Have questions about FundFlare? We're here to help! Reach out to our team and we'll get back to you as soon as possible.
                         </p>
+                    </div>
+                </div>
+            </section>
 
-                        <div className="space-y-6">
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-primaryGreen/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <FaMapMarkerAlt className="text-primaryGreen text-xl" />
+            {/* Contact Info */}
+            <section className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {contactInfo.map((info, index) => {
+                            const IconComponent = info.icon;
+                            return (
+                                <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center hover:shadow-lg transition-shadow">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                        <IconComponent className="text-white" size={28} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-4">{info.title}</h3>
+                                    <div className="space-y-2 mb-4">
+                                        {info.details.map((detail, idx) => (
+                                            <p key={idx} className="text-gray-600 font-medium">{detail}</p>
+                                        ))}
+                                    </div>
+                                    <p className="text-sm text-gray-500">{info.description}</p>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-PoppinsBold text-gray-900 mb-2">Visit Us</h3>
-                                    <p className="text-gray-600 font-PoppinsRegular">123 Nature Trail</p>
-                                    <p className="text-gray-600 font-PoppinsRegular">Wilderness Valley, CA 90210</p>
-                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* Contact Form & FAQ */}
+            <section className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Contact Form */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                            <div className="flex items-center gap-3 mb-8">
+                                <MessageSquare className="text-blue-600" size={24} />
+                                <h2 className="text-2xl font-bold text-gray-900">Send us a Message</h2>
                             </div>
 
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-primaryGreen/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <FaPhone className="text-primaryGreen text-xl" />
+                            {isSubmitted ? (
+                                <div className="text-center py-12">
+                                    <CheckCircle className="mx-auto text-green-500 mb-4" size={48} />
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                                    <p className="text-gray-600">Thank you for reaching out. We'll get back to you within 24 hours.</p>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-PoppinsBold text-gray-900 mb-2">Call Us</h3>
-                                    <p className="text-gray-600 font-PoppinsRegular">+1 (555) 123-4567</p>
-                                    <p className="text-gray-600 font-PoppinsRegular">Available 24/7 for emergencies</p>
-                                </div>
-                            </div>
+                            ) : (
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={form.name}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="Enter your full name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={form.email}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="Enter your email"
+                                            />
+                                        </div>
+                                    </div>
 
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-primaryGreen/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <FaEnvelope className="text-primaryGreen text-xl" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-PoppinsBold text-gray-900 mb-2">Email Us</h3>
-                                    <p className="text-gray-600 font-PoppinsRegular">hello@gcamping.com</p>
-                                    <p className="text-gray-600 font-PoppinsRegular">We'll respond within 2 hours</p>
-                                </div>
-                            </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
+                                        <input
+                                            type="text"
+                                            name="subject"
+                                            value={form.subject}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="What's this about?"
+                                        />
+                                    </div>
 
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-primaryGreen/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <FaClock className="text-primaryGreen text-xl" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-PoppinsBold text-gray-900 mb-2">Business Hours</h3>
-                                    <p className="text-gray-600 font-PoppinsRegular">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                                    <p className="text-gray-600 font-PoppinsRegular">Saturday - Sunday: 10:00 AM - 4:00 PM</p>
-                                </div>
-                            </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Message</label>
+                                        <textarea
+                                            name="message"
+                                            value={form.message}
+                                            onChange={handleChange}
+                                            required
+                                            rows={6}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="Tell us how we can help you..."
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send size={20} />
+                                                Send Message
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+                            )}
                         </div>
 
-                        {/* Map Placeholder */}
-                        <div className="mt-8 bg-gray-200 rounded-2xl h-64 flex items-center justify-center">
-                            <div className="text-center">
-                                <FaMapMarkerAlt className="text-gray-400 text-4xl mx-auto mb-4" />
-                                <p className="text-gray-600 font-PoppinsMedium">Interactive Map Coming Soon</p>
+                        {/* FAQ Section */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-8">
+                                <Users className="text-blue-600" size={24} />
+                                <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+                            </div>
+
+                            <div className="space-y-6">
+                                {faqs.map((faq, index) => (
+                                    <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-3">{faq.question}</h3>
+                                        <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-8 bg-blue-50 rounded-2xl p-6">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3">Need Immediate Help?</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Check out our comprehensive help center with guides, tutorials, and troubleshooting tips.
+                                </p>
+                                <button className="text-blue-600 hover:text-blue-700 font-semibold">
+                                    Visit Help Center →
+                                </button>
                             </div>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    {/* Contact Form */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                        <h2 className="text-2xl font-PoppinsBold text-gray-900 mb-6">Send us a Message</h2>
-
-                        <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Office Hours */}
+            <section className="py-16 bg-white">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
+                        <div className="flex items-center justify-center gap-3 mb-6">
+                            <Clock size={24} />
+                            <h2 className="text-2xl font-bold">Business Hours</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label className="block text-sm font-PoppinsMedium text-gray-700 mb-2">
-                                    Full Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primaryGreen font-PoppinsRegular"
-                                    placeholder="Enter your full name"
-                                    required
-                                />
+                                <div className="font-semibold mb-2">Monday - Friday</div>
+                                <div className="text-blue-100">9:00 AM - 6:00 PM EST</div>
                             </div>
-
                             <div>
-                                <label className="block text-sm font-PoppinsMedium text-gray-700 mb-2">
-                                    Email Address *
-                                </label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primaryGreen font-PoppinsRegular"
-                                    placeholder="Enter your email address"
-                                    required
-                                />
+                                <div className="font-semibold mb-2">Saturday</div>
+                                <div className="text-blue-100">10:00 AM - 4:00 PM EST</div>
                             </div>
-
                             <div>
-                                <label className="block text-sm font-PoppinsMedium text-gray-700 mb-2">
-                                    Subject *
-                                </label>
-                                <input
-                                    type="text"
-                                    name="subject"
-                                    value={formData.subject}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primaryGreen font-PoppinsRegular"
-                                    placeholder="What is this about?"
-                                    required
-                                />
+                                <div className="font-semibold mb-2">Sunday</div>
+                                <div className="text-blue-100">Closed</div>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-PoppinsMedium text-gray-700 mb-2">
-                                    Message *
-                                </label>
-                                <textarea
-                                    name="message"
-                                    value={formData.message}
-                                    onChange={handleInputChange}
-                                    rows="5"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primaryGreen font-PoppinsRegular resize-none"
-                                    placeholder="Tell us more about your inquiry..."
-                                    required
-                                ></textarea>
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="w-full bg-primaryGreen text-white py-3 px-6 rounded-xl font-PoppinsBold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                            >
-                                <FaPaperPlane />
-                                Send Message
-                            </button>
-                        </form>
-
-                        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                            <p className="text-sm text-blue-800 font-PoppinsRegular">
-                                <strong>Need immediate assistance?</strong> Call our 24/7 support line at +1 (555) 123-4567
+                        </div>
+                        <div className="mt-6 pt-6 border-t border-blue-500">
+                            <p className="text-blue-100">
+                                For urgent matters outside business hours, please email us and we'll respond as soon as possible.
                             </p>
                         </div>
                     </div>
                 </div>
-
-                {/* FAQ Section */}
-                <div className="mt-20">
-                    <h2 className="text-3xl font-PoppinsBold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                            <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">How do I make a donation or start a campaign?</h3>
-                            <p className="text-gray-600 font-PoppinsRegular">
-                                You can make a donation or start a campaign by visiting our website and selecting the "Donate" or "Start Campaign" option.
-                                You'll be guided through the process to ensure your donation or campaign is successful.
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                            <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">What is your cancellation policy?</h3>
-                            <p className="text-gray-600 font-PoppinsRegular">
-                                Cancellations made 48 hours before check-in receive a full refund.
-                                Cancellations within 48 hours are subject to a 50% charge.
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                            <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">Do you provide camping equipment?</h3>
-                            <p className="text-gray-600 font-PoppinsRegular">
-                                Yes, we offer rental equipment including tents, sleeping bags, and cooking gear.
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                            <h3 className="text-lg font-PoppinsBold text-gray-900 mb-3">Are pets allowed?</h3>
-                            <p className="text-gray-600 font-PoppinsRegular">
-                                Pets are welcome at most of our camping sites. Please check the specific site
-                                details for pet policies and any additional fees.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     );
 };

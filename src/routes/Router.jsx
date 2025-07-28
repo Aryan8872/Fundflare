@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import MainLayout from '../layout/MainLayout';
 import CampaignsAdmin from '../pages/admin/CampaignsAdmin';
+import DonationsAdmin from '../pages/admin/DonationsAdmin';
 import LogsAdmin from '../pages/admin/LogsAdmin';
 import PayoutsAdmin from '../pages/admin/PayoutsAdmin';
 import UsersAdmin from '../pages/admin/UsersAdmin';
@@ -44,6 +45,7 @@ const Router = () => (
             <Route path="/admin/campaigns" element={<AdminRoute><CampaignsAdmin /></AdminRoute>} />
             <Route path="/admin/payouts" element={<AdminRoute><PayoutsAdmin /></AdminRoute>} />
             <Route path="/admin/logs" element={<AdminRoute><LogsAdmin /></AdminRoute>} />
+            <Route path="/admin/donations" element={<AdminRoute><DonationsAdmin /></AdminRoute>} />
             <Route path="/create-campaign" element={<CreateCampaign />} />
             <Route path="*" element={<Navigate to="/" />} />
         </Route>

@@ -1,13 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import fetch from 'node-fetch';
 import { z } from 'zod';
 import catchAsync from '../utils/catchAsync.js';
 import { sendEmail } from '../utils/emailService.js';
-import logger from '../utils/logger.js';
+import logger, { logUserActivity } from '../utils/logger.js';
+import { generateOtp, hashOtp } from '../utils/otpUtils.js';
 
 const prisma = new PrismaClient();
 
@@ -19,8 +19,8 @@ const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '6LeIxAcTAAAAAGG-vF
 
 export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // max 20 login requests per IP per window
-    message: 'Too many login attempts from this IP, please try again later.'
+    max: 5, // max 5 login requests per IP per window (stricter for security)
+    message: 'Too many login attempts from this IP, try again later.'
 });
 
 const signupSchema = z.object({
@@ -45,13 +45,6 @@ const generateToken = (userId) => {
         expiresIn: '1d',
     });
 };
-
-function generateOtp() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
-function hashOtp(otp) {
-    return crypto.createHash('sha256').update(otp).digest('hex');
-}
 
 export const register = catchAsync(async (req, res) => {
     const { captcha, ...body } = req.body;
@@ -103,6 +96,9 @@ export const register = catchAsync(async (req, res) => {
         user,
         message: 'Registration successful'
     });
+
+    // Log user activity
+    logUserActivity(user.id, 'USER_REGISTRATION', `User registered with email ${user.email}`, `Role: ${user.role}`);
     logger.info(`User registered: ${user.email} (${user.id})`);
 });
 
@@ -139,6 +135,9 @@ export const login = catchAsync(async (req, res) => {
     await prisma.user.update({ where: { id: user.id }, data: { otpHash, otpExpiry } });
     // Send OTP via email
     await sendEmail(user.email, 'otp', { otp });
+
+    // Log user activity
+    logUserActivity(user.id, 'LOGIN_ATTEMPT', `Login attempt initiated for user ${user.email}`, `OTP sent`);
     logger.info(`OTP sent to user: ${user.email} (${user.id})`);
     res.json({ message: 'OTP sent to your email. Please verify to complete login.' });
 });
@@ -167,6 +166,9 @@ export const verifyOtp = catchAsync(async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000 // 1 day
     };
     res.cookie('token', token, cookieOptions);
+
+    // Log user activity
+    logUserActivity(user.id, 'LOGIN_SUCCESS', `User successfully logged in`, `Email: ${user.email}, Role: ${user.role}`);
     logger.info(`User login (OTP verified): ${user.email} (${user.id})`);
     res.json({
         user: {
@@ -180,13 +182,13 @@ export const verifyOtp = catchAsync(async (req, res) => {
 });
 
 export const logout = catchAsync(async (req, res) => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const cookieOptions = {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'Strict' : 'Lax',
-    };
-    res.clearCookie('token', cookieOptions);
+    res.clearCookie('token');
+
+    // Log user activity
+    if (req.user) {
+        logUserActivity(req.user.id, 'LOGOUT', `User logged out`, `Email: ${req.user.email}`);
+    }
+
     res.json({ message: 'Logged out successfully' });
 });
 
@@ -210,13 +212,39 @@ export const getCurrentUser = catchAsync(async (req, res) => {
 });
 
 export const updateProfile = catchAsync(async (req, res) => {
-    const userId = req.user.id;
-    const { name, email, password } = req.body;
-    const data = {};
-    if (name) data.name = name;
-    if (email) data.email = email;
-    if (password) data.password = await bcrypt.hash(password, 12);
-    const updated = await prisma.user.update({ where: { id: userId }, data });
-    const { password: _, ...userWithoutPassword } = updated;
-    res.json({ user: userWithoutPassword });
+    const { name, email, currentPassword, newPassword } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email && email !== user.email) {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) throw { status: 400, message: 'Email already in use' };
+        updateData.email = email;
+    }
+
+    if (newPassword) {
+        if (!currentPassword) throw { status: 400, message: 'Current password required' };
+        const valid = await bcrypt.compare(currentPassword, user.password);
+        if (!valid) throw { status: 400, message: 'Current password is incorrect' };
+        updateData.password = await bcrypt.hash(newPassword, 12);
+    }
+
+    const updatedUser = await prisma.user.update({
+        where: { id: req.user.id },
+        data: updateData,
+        select: { id: true, name: true, email: true, role: true }
+    });
+
+    // Log user activity
+    const changes = [];
+    if (name) changes.push('name updated');
+    if (email && email !== user.email) changes.push('email updated');
+    if (newPassword) changes.push('password updated');
+
+    if (changes.length > 0) {
+        logUserActivity(req.user.id, 'PROFILE_UPDATE', `User updated profile`, `Changes: ${changes.join(', ')}`);
+    }
+
+    res.json({ user: updatedUser, message: 'Profile updated successfully' });
 }); 

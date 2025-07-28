@@ -18,7 +18,10 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 // Register Stripe webhook route BEFORE body parsers
 app.post(

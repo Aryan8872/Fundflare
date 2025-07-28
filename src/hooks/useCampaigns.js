@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createCampaign, getCampaignById, getCampaigns } from '../api/campaignApi';
-import { useAuthContext } from '../contexts/AuthContext';
 
 export const useCampaigns = (params) => {
     return useQuery({
@@ -18,10 +17,9 @@ export const useCampaign = (id) => {
 };
 
 export const useCreateCampaign = () => {
-    const { token } = useAuthContext();
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data) => createCampaign(data, token),
+        mutationFn: (data) => createCampaign(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['campaigns'] });
         },

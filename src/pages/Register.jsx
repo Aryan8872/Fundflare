@@ -5,11 +5,33 @@ import { toast } from 'react-toastify';
 
 const Register = () => {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
+    const [passwordStrength, setPasswordStrength] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [captcha, setCaptcha] = useState(null);
     const navigate = useNavigate();
-    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+        if (e.target.name === 'password') {
+            setPasswordStrength(getPasswordStrength(e.target.value));
+        }
+    };
+
+    // Password strength: 0 = empty, 1 = weak, 2 = fair, 3 = good, 4 = strong
+    const getPasswordStrength = (password) => {
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        if (score === 0) return 0;
+        if (score <= 2) return 1;
+        if (score === 3) return 2;
+        if (score === 4) return 3;
+        if (score === 5) return 4;
+        return 0;
+    };
 
     const validatePassword = (password) => {
         if (password.length < 8) return 'Password must be at least 8 characters';
@@ -65,7 +87,19 @@ const Register = () => {
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 12, fontSize: 16 }} />
                     <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 12, fontSize: 16 }} />
-                    <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 12, fontSize: 16 }} />
+                    <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 4, fontSize: 16 }} />
+                    {/* Password Strength Bar */}
+                    <div style={{ height: 8, width: '100%', background: '#e0e7ef', borderRadius: 6, marginBottom: 12, overflow: 'hidden' }}>
+                        <div style={{
+                            height: '100%',
+                            width: `${passwordStrength * 25}%`,
+                            background: passwordStrength === 1 ? '#ef4444' : passwordStrength === 2 ? '#f59e42' : passwordStrength === 3 ? '#facc15' : passwordStrength === 4 ? '#22c55e' : 'transparent',
+                            transition: 'width 0.3s',
+                        }} />
+                    </div>
+                    <div style={{ fontSize: 13, color: passwordStrength === 1 ? '#ef4444' : passwordStrength === 2 ? '#f59e42' : passwordStrength === 3 ? '#facc15' : passwordStrength === 4 ? '#22c55e' : '#888', marginBottom: 8, minHeight: 18 }}>
+                        {form.password.length === 0 ? '' : passwordStrength === 1 ? 'Weak' : passwordStrength === 2 ? 'Fair' : passwordStrength === 3 ? 'Good' : passwordStrength === 4 ? 'Strong' : ''}
+                    </div>
                     <ReCAPTCHA
                         sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
                         onChange={setCaptcha}

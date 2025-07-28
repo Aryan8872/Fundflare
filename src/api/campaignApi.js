@@ -14,13 +14,13 @@ export const getCampaignById = async (id) => {
     return res.json();
 };
 
-export const createCampaign = async (data, token) => {
+export const createCampaign = async (data) => {
     const res = await fetch(API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Failed to create campaign');

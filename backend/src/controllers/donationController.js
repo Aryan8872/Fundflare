@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import Stripe from 'stripe';
 import * as donationService from '../services/donationService.js';
 import catchAsync from '../utils/catchAsync.js';
-import logger from '../utils/logger.js';
+import logger, { logUserActivity } from '../utils/logger.js';
 import { donationSchema } from '../validation/donationValidation.js';
 const stripe = new Stripe('sk_test_51RooXv5hlGq5vdMY5JdNvSjBtFkL1VquMlFoOwTSC5SwmM318RXKWXSmjqY0DPJ8ajNv4u342u1bTarMbFDpen9700q9jJH8Ei');
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
@@ -29,6 +29,12 @@ export const createDonation = catchAsync(async (req, res) => {
             data: { currentAmount: { increment: data.amount } }
         });
         logger.info(`[createDonation] Success: user=${req.user?.id || 'guest'} campaign=${data.campaignId} amount=${data.amount}`);
+        
+        // Log user activity
+        if (req.user) {
+            logUserActivity(req.user.id, 'DONATION_CREATED', `User made a donation of $${data.amount}`, `Campaign: ${campaign.title}, Type: ${data.type}`);
+        }
+        
         res.status(201).json({ donation, message: 'Donation successful' });
     } catch (err) {
         logger.error(`[createDonation] Error: ${err && err.message ? err.message : JSON.stringify(err)}`);
@@ -75,6 +81,7 @@ export const createStripeSession = catchAsync(async (req, res) => {
         // Find campaign
         const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
         if (!campaign || campaign.status !== 'active') throw { status: 404, message: 'Campaign not found or inactive' };
+
         // Create Stripe Checkout session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -92,6 +99,7 @@ export const createStripeSession = catchAsync(async (req, res) => {
             metadata: {
                 campaignId,
                 guestEmail: guestEmail || '',
+                donorId: req.user?.id || '', // Include user ID if logged in
             },
             receipt_email: guestEmail || undefined,
         });
@@ -120,20 +128,34 @@ export const handleStripeWebhook = async (req, res) => {
         try {
             const campaignId = session.metadata.campaignId;
             const guestEmail = session.metadata.guestEmail || null;
+            const donorId = session.metadata.donorId || null;
             const amount = session.amount_total / 100;
-            // Create donation as guest (no userId)
-            await donationService.createDonation({
-                donorId: null,
+
+            // Create donation with proper donor info
+            const donation = await donationService.createDonation({
+                donorId: donorId || null,
                 guestEmail,
                 campaignId,
                 amount,
                 type: 'ONE_TIME'
             });
+
+            // Create transaction record
+            await prisma.transaction.create({
+                data: {
+                    donationId: donation.id,
+                    paymentId: session.payment_intent || session.id,
+                    provider: 'Stripe',
+                    status: 'success',
+                    amount: amount
+                }
+            });
+
             await prisma.campaign.update({
                 where: { id: campaignId },
                 data: { currentAmount: { increment: amount } }
             });
-            logger.info(`[handleStripeWebhook] Donation created for campaign=${campaignId} amount=${amount}`);
+            logger.info(`[handleStripeWebhook] Donation created for campaign=${campaignId} amount=${amount} donorId=${donorId}`);
         } catch (err) {
             logger.error(`[handleStripeWebhook] Error creating donation: ${err.message}`);
         }

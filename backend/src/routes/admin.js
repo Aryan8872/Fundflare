@@ -1,9 +1,11 @@
 import express from 'express';
 import * as adminController from '../controllers/adminController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// All admin routes require admin authentication (add middleware in production)
+// Protect all admin routes
+router.use(authenticateToken);
 
 // Dashboard
 router.get('/dashboard', adminController.getDashboardStats);
@@ -16,6 +18,8 @@ router.post('/payouts/:id/complete', adminController.completePayoutRequest);
 
 // User Management
 router.get('/users', adminController.getAllUsersAdmin);
+router.patch('/users/:id/role', adminController.updateUserRole);
+router.post('/users/:id/deactivate', adminController.deactivateUser);
 
 // Campaign Management
 router.get('/campaigns', adminController.getAllCampaignsAdmin);
