@@ -23,7 +23,7 @@ const app = express();
 app.use(userLogMiddleware);
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://localhost:5173',
     credentials: true
 }));
 
@@ -45,7 +45,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true, maxAge: 1000 * 60 * 60 * 24 },
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 1000 * 60 * 60 * 24
+    },
 }));
 
 app.use(cookieParser());

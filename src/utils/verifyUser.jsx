@@ -1,5 +1,5 @@
 async function getCsrfToken() {
-    const response = await fetch('http://localhost:3000/api/auth/csrf-token', {
+    const response = await fetch('https://localhost:3000/api/auth/csrf-token', {
         credentials: 'include' // Ensure cookies are sent with the request
     });
     const data = await response.json();
@@ -8,7 +8,7 @@ async function getCsrfToken() {
 
 async function registerUser(userData) {
     const csrfToken = await getCsrfToken();
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch('https://localhost:3000/api/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

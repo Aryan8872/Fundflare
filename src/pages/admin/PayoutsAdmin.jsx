@@ -7,7 +7,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 
 // Utility to fetch CSRF token
 async function getCsrfToken() {
-    const BACKEND_URL = 'http://localhost:5000';
+    const BACKEND_URL = 'https://localhost:5000';
     const res = await fetch(`${BACKEND_URL}/api/auth/csrf-token`, { credentials: 'include' });
     const data = await res.json();
     return data.csrfToken;
@@ -43,7 +43,7 @@ const PayoutsAdmin = () => {
         }
         try {
             const csrfToken = await getCsrfToken();
-            const BACKEND_URL = 'http://localhost:5000';
+            const BACKEND_URL = 'https://localhost:5000';
             const res = await fetch(`${BACKEND_URL}/api/admin/payouts/${id}/${action}`, {
                 method: 'POST',
                 headers: {

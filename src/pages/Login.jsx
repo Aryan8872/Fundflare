@@ -18,7 +18,7 @@ const Login = () => {
         setError(null);
         if (step === 1) {
             try {
-                const res = await fetch('http://localhost:5000/api/auth/login', {
+                const res = await fetch('https://localhost:5000/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(form),
@@ -40,7 +40,7 @@ const Login = () => {
             }
         } else if (step === 2) {
             try {
-                const res = await fetch('http://localhost:5000/api/auth/verify-otp', {
+                const res = await fetch('https://localhost:5000/api/auth/verify-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: form.email, otp }),

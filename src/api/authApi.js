@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://localhost:5000/api',
+        baseUrl: 'https://localhost:5000/api',
         credentials: 'include',
     }),
     endpoints: (builder) => ({
@@ -41,7 +41,7 @@ export const authApi = createApi({
 });
 
 export const getCurrentUser = async () => {
-    const res = await fetch('http://localhost:5000/api/auth/me', {
+    const res = await fetch('https://localhost:5000/api/auth/me', {
         credentials: 'include'
     });
     if (!res.ok) return null;

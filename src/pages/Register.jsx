@@ -59,9 +59,9 @@ const Register = () => {
         }
         try {
             // Fetch CSRF token from backend
-            const csrfRes = await fetch('http://localhost:5000/api/auth/csrf-token', { credentials: 'include' });
+            const csrfRes = await fetch('https://localhost:5000/api/auth/csrf-token', { credentials: 'include' });
             const { csrfToken } = await csrfRes.json();
-            const res = await fetch('http://localhost:5000/api/auth/register', {
+            const res = await fetch('https://localhost:5000/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

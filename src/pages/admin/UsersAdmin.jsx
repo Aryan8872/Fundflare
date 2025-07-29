@@ -8,7 +8,7 @@ import { useAdminUsers, useDeactivateUser, useUpdateUserRole } from '../../hooks
 
 // Utility to fetch CSRF token
 async function getCsrfToken() {
-    const BACKEND_URL = 'http://localhost:5000';
+    const BACKEND_URL = 'https://localhost:5000';
     const res = await fetch(`${BACKEND_URL}/api/auth/csrf-token`, { credentials: 'include' });
     const data = await res.json();
     return data.csrfToken;
@@ -50,7 +50,7 @@ const UsersAdmin = () => {
         }
         try {
             const csrfToken = await getCsrfToken();
-            const BACKEND_URL = 'http://localhost:5000';
+            const BACKEND_URL = 'https://localhost:5000';
             const res = await fetch(`${BACKEND_URL}/api/admin/users/${userId}/role`, {
                 method: 'PATCH',
                 headers: {
@@ -75,7 +75,7 @@ const UsersAdmin = () => {
         if (window.confirm('Are you sure you want to deactivate this user?')) {
             try {
                 const csrfToken = await getCsrfToken();
-                const BACKEND_URL = 'http://localhost:5000';
+                const BACKEND_URL = 'https://localhost:5000';
                 const res = await fetch(`${BACKEND_URL}/api/admin/users/${userId}/deactivate`, {
                     method: 'POST',
                     headers: {

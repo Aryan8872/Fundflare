@@ -1,12 +1,12 @@
 import { CheckCircle, DollarSign, Edit, Eye, Filter, Target, Trash2, XCircle } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/admin/Sidebar';
 import { useAuthContext } from '../../contexts/AuthContext';
 
 const statusOptions = ['All', 'pending', 'approved', 'rejected'];
 const categories = ['Health', 'Education', 'Medical', 'Startups'];
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'https://localhost:5000';
 
 // Utility to fetch CSRF token
 async function getCsrfToken() {

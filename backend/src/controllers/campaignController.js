@@ -15,7 +15,6 @@ export const getAllCampaigns = catchAsync(async (req, res) => {
             { description: { contains: search, mode: 'insensitive' } },
         ];
     }
-    // Only filter by category if it's a real value
     if (category && category !== 'undefined' && category !== 'All') where.category = category;
     const campaigns = await campaignService.getAllCampaigns(where);
     res.json({ campaigns });

@@ -8,7 +8,7 @@ export default function UserLogs() {
     useEffect(() => {
         async function fetchLogs() {
             try {
-                const res = await fetch('http://localhost:5000/api/logs', { credentials: 'include' });
+                const res = await fetch('https://localhost:5000/api/logs', { credentials: 'include' });
                 if (!res.ok) throw new Error('Failed to fetch logs');
                 const data = await res.json();
                 setLogs(data.logs || []);

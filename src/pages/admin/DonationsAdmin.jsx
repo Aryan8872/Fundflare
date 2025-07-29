@@ -1,10 +1,10 @@
 import { Calendar, DollarSign, Eye, Filter, TrendingUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/admin/Sidebar';
 import { useAuthContext } from '../../contexts/AuthContext';
 
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'https://localhost:5000';
 
 const DonationsAdmin = () => {
     const { user } = useAuthContext();

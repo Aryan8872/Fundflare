@@ -1,5 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { toast } from 'react-toastify';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -31,9 +31,9 @@ const DonationModal = ({ open, onClose, campaignId }) => {
         }
         try {
             // Fetch CSRF token
-            const csrfRes = await fetch('http://localhost:5000/api/auth/csrf-token', { credentials: 'include' });
+            const csrfRes = await fetch('https://localhost:5000/api/auth/csrf-token', { credentials: 'include' });
             const { csrfToken } = await csrfRes.json();
-            const res = await fetch('http://localhost:5000/api/donations/stripe-session', {
+            const res = await fetch('https://localhost:5000/api/donations/stripe-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
