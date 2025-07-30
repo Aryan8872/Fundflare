@@ -46,7 +46,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Always secure for HTTPS
         httpOnly: true,
         sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24
@@ -57,8 +57,8 @@ app.use(cookieParser());
 
 app.use(helmet());
 
-// CSRF protection for state-changing routes
-app.use(['/api/campaigns', '/api/donations', '/api/auth/logout', '/api/auth/register'], csurf({ cookie: true }));
+// CSRF protection for all API routes
+app.use('/api', csurf({ cookie: true }));
 
 // CSRF error handler
 app.use((err, req, res, next) => {

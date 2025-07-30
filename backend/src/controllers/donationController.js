@@ -94,8 +94,8 @@ export const createStripeSession = catchAsync(async (req, res) => {
                 quantity: 1,
             }],
             mode: 'payment',
-            success_url: 'http://localhost:5173/success',
-            cancel_url: 'http://localhost:5173/cancel',
+            success_url: 'https://localhost:5173/success',
+            cancel_url: 'https://localhost:5173/cancel',
             metadata: {
                 campaignId,
                 guestEmail: guestEmail || '',
