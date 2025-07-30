@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 import { z } from 'zod';
 import catchAsync from '../utils/catchAsync.js';
 import { sendEmail } from '../utils/emailService.js';
-import logger, { logUserActivity } from '../utils/logger.js';
+import logger, { userActivityLogger } from '../utils/logger.js';
 import { generateOtp, hashOtp } from '../utils/otpUtils.js';
 
 const prisma = new PrismaClient();
@@ -100,8 +100,15 @@ export const register = catchAsync(async (req, res) => {
     });
 
     // Log user activity
-    logUserActivity(user.id, 'USER_REGISTRATION', `User registered with email ${user.email}`, `Role: ${user.role}`);
-    logger.info(`User registered: ${user.email} (${user.id})`);
+    userActivityLogger.info({
+        userId: user.id,
+        action: 'USER_REGISTRATION',
+        message: 'User registered',
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl,
+        details: `Email: ${user.email}, Role: ${user.role}`
+    }); logger.info(`User registered: ${user.email} (${user.id})`);
 });
 
 export const login = catchAsync(async (req, res) => {
@@ -139,8 +146,15 @@ export const login = catchAsync(async (req, res) => {
     await sendEmail(user.email, 'otp', { otp });
 
     // Log user activity
-    logUserActivity(user.id, 'LOGIN_ATTEMPT', `Login attempt initiated for user ${user.email}`, `OTP sent`);
-    logger.info(`OTP sent to user: ${user.email} (${user.id})`);
+    userActivityLogger.info({
+        userId: user.id,
+        action: 'LOGIN_ATTEMPT',
+        message: 'Login attempt initiated',
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl,
+        details: `Email: ${user.email}`
+    });
     res.json({ message: 'OTP sent to your email. Please verify to complete login.' });
 });
 
@@ -170,8 +184,15 @@ export const verifyOtp = catchAsync(async (req, res) => {
     res.cookie('token', token, cookieOptions);
 
     // Log user activity
-    logUserActivity(user.id, 'LOGIN_SUCCESS', `User successfully logged in`, `Email: ${user.email}, Role: ${user.role}`);
-    logger.info(`User login (OTP verified): ${user.email} (${user.id})`);
+    userActivityLogger.info({
+        userId: user.id,
+        action: 'LOGIN_SUCCESS',
+        message: 'User successfully logged in',
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl,
+        details: `Email: ${user.email}, Role: ${user.role}`
+    }); logger.info(`User login (OTP verified): ${user.email} (${user.id})`);
     res.json({
         user: {
             id: user.id,
@@ -188,7 +209,15 @@ export const logout = catchAsync(async (req, res) => {
 
     // Log user activity
     if (req.user) {
-        logUserActivity(req.user.id, 'LOGOUT', `User logged out`, `Email: ${req.user.email}`);
+        userActivityLogger.info({
+            userId: req.user.id,
+            action: 'LOGOUT',
+            message: 'User logged out',
+            ip: req.ip,
+            method: req.method,
+            url: req.originalUrl,
+            details: `Email: ${req.user.email}`
+        });
     }
 
     res.json({ message: 'Logged out successfully' });
@@ -245,7 +274,15 @@ export const updateProfile = catchAsync(async (req, res) => {
     if (newPassword) changes.push('password updated');
 
     if (changes.length > 0) {
-        logUserActivity(req.user.id, 'PROFILE_UPDATE', `User updated profile`, `Changes: ${changes.join(', ')}`);
+        userActivityLogger.info({
+            userId: req.user.id,
+            action: 'PROFILE_UPDATE',
+            message: 'User updated profile',
+            ip: req.ip,
+            method: req.method,
+            url: req.originalUrl,
+            details: `Changes: ${changes.join(', ')}`
+        });
     }
 
     res.json({ user: updatedUser, message: 'Profile updated successfully' });

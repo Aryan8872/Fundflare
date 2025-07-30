@@ -1,5 +1,5 @@
 import { Calendar, Edit, Lock, Mail, Save, Shield, User, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const Profile = () => {
@@ -17,14 +17,28 @@ const Profile = () => {
         setLoading(true);
         setError(null);
         setSuccess(null);
+
         try {
+            // Step 1: Fetch CSRF token
+            const csrfRes = await fetch('/api/auth/csrf-token', {
+                credentials: 'include'
+            });
+            const csrfData = await csrfRes.json();
+            const csrfToken = csrfData.csrfToken;
+
+            // Step 2: Send PATCH request with CSRF token
             const res = await fetch('/api/users/profile', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
+                },
                 credentials: 'include',
                 body: JSON.stringify(form),
             });
+
             if (!res.ok) throw new Error('Failed to update profile');
+
             const { user: updated } = await res.json();
             setUser(updated);
             setSuccess('Profile updated successfully!');

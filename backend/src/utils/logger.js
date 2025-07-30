@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-// Main logger for system logs
+// Main system logger
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -20,13 +20,13 @@ const logger = winston.createLogger({
   ]
 });
 
-// Dedicated user activity logger
-const userActivityLogger = winston.createLogger({
+// Updated user activity logger
+export const userActivityLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message, userId, action, details }) => {
-      return `${timestamp} [USER_ACTIVITY]: User ${userId || 'anonymous'} performed ${action} - ${message} ${details ? `(${details})` : ''}`;
+    winston.format.printf(({ timestamp, level, message, userId, action, method, url, ip, details }) => {
+      return `${timestamp} [USER_ACTIVITY]: IP ${ip || 'unknown'} | ${method || 'METHOD'} ${url || 'URL'} | User ${userId || 'anonymous'} performed ${action} - ${message}${details ? ` (${details})` : ''}`;
     })
   ),
   transports: [
@@ -40,9 +40,15 @@ const userActivityLogger = winston.createLogger({
   ]
 });
 
-// Helper function to log user activities
+// New signature with full context
 export const logUserActivity = (userId, action, message, details = null) => {
-  userActivityLogger.info(message, { userId, action, details });
+  logger.info(message, {
+    userId,
+    action,
+    details,
+    timestamp: new Date().toISOString(),
+    service: 'fundflare-backend',
+  });
 };
 
-export default logger; 
+export default logger;

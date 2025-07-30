@@ -19,8 +19,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', true)
 
-app.use(userLogMiddleware);
+
+
 
 app.use(cors({
     origin: 'https://localhost:5173',
@@ -29,7 +31,7 @@ app.use(cors({
 
 // Register Stripe webhook route BEFORE body parsers
 app.post(
-    '/api/webhooks/stripe',
+    '/webhooks/stripe',
     express.raw({ type: 'application/json' }),
     handleStripeWebhook
 );
@@ -56,6 +58,9 @@ app.use(session({
 app.use(cookieParser());
 
 app.use(helmet());
+
+app.use(userLogMiddleware);
+
 
 // CSRF protection for all API routes
 app.use('/api', csurf({ cookie: true }));

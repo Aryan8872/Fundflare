@@ -7,8 +7,12 @@ export async function userLogMiddleware(req, res, next) {
         const email = req.user?.email || 'anonymous';
         const username = req.user?.name || null;
         const url = req.originalUrl;
+        const ip = req.headers['x-forwarded-for'] || req.ip;
         const method = req.method;
-        logUserActivityToDb({ email, username, url, method });
+        res.on('finish', () => {
+            const status = res.statusCode;
+            logUserActivityToDb({ email, username, url, method, status, ip });
+        });
     }
     next();
 }

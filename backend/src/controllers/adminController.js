@@ -201,9 +201,18 @@ export const updateUserRole = async (req, res) => {
             where: { id },
             data: { role },
         });
-        
+
         // Log admin activity
-        logUserActivity(req.user.id, 'ADMIN_ROLE_CHANGE', `Admin changed user role`, `Target user: ${user.email}, New role: ${role}`);
+        logUserActivity({
+            userId: req.user?.id,
+            action: 'UPDATE_ROLE',
+            message: `Admin ${req.user.email} changed role for user ${user.email} to ${role}`,
+            method: req.method,
+            url: req.originalUrl,
+            ip: req.headers['x-forwarded-for'] || req.ip,
+            details: `TargetUserID: ${user.id}`
+        });
+
         logger.info(`Admin ${req.user.email} changed role for user ${user.email} to ${role}`);
         res.json({ status: 'success', user });
     } catch (err) {
@@ -223,9 +232,17 @@ export const deactivateUser = async (req, res) => {
             where: { id },
             data: { status: 'deactivated' },
         });
-        
+
         // Log admin activity
-        logUserActivity(req.user.id, 'ADMIN_USER_DEACTIVATION', `Admin deactivated user`, `Target user: ${user.email}`);
+        logUserActivity({
+            userId: req.user?.id,
+            action: 'DEACTIVATE_USER',
+            message: `Admin ${req.user.email} deactivated user ${user.email}`,
+            method: req.method,
+            url: req.originalUrl,
+            ip: req.headers['x-forwarded-for'] || req.ip,
+            details: `TargetUserID: ${user.id}`
+        });
         logger.info(`Admin ${req.user.email} deactivated user ${user.email}`);
         res.json({ status: 'success', user });
     } catch (err) {

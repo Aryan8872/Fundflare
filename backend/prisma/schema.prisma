@@ -4,6 +4,8 @@ model UserLog {
   username  String?
   url       String
   method    String
+  status    Int @default(200)
+  ip        String?
   createdAt DateTime @default(now())
 }
 
