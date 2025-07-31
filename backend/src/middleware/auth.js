@@ -60,4 +60,4 @@ export const requireRole = (roles) => {
 };
 
 // FundFlare roles: 'DONOR', 'CREATOR', 'ADMIN'
-export const requireAdmin = requireRole(['ADMIN']); // Use 'ADMIN' (uppercase) for FundFlare 
+export const requireAdmin = requireRole(['ADMIN']); 

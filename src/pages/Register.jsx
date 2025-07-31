@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const Register = () => {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -87,7 +89,45 @@ const Register = () => {
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 12, fontSize: 16 }} />
                     <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 12, fontSize: 16 }} />
-                    <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #cbd5e1', marginBottom: 4, fontSize: 16 }} />
+                    <div style={{ position: 'relative', width: '100%' }}>
+                        <input
+                            name="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: 12,
+                                borderRadius: 8,
+                                border: '1px solid #cbd5e1',
+                                marginBottom: 4,
+                                fontSize: 16,
+                                paddingRight: 40
+                            }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword((v) => !v)}
+                            style={{
+                                position: 'absolute',
+                                right: 12,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                color: '#888',
+                                fontSize: 18
+                            }}
+                            tabIndex={-1}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                    </div>
                     {/* Password Strength Bar */}
                     <div style={{ height: 8, width: '100%', background: '#e0e7ef', borderRadius: 6, marginBottom: 12, overflow: 'hidden' }}>
                         <div style={{

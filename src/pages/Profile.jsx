@@ -114,7 +114,6 @@ const Profile = () => {
                                     placeholder="Enter your full name"
                                     required
                                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                                    disabled={!editing}
                                 />
                             </div>
 
@@ -132,7 +131,6 @@ const Profile = () => {
                                     type="email"
                                     required
                                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                                    disabled={!editing}
                                 />
                             </div>
 
@@ -149,7 +147,6 @@ const Profile = () => {
                                     placeholder="Enter new password (leave blank to keep current)"
                                     type="password"
                                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                                    disabled={!editing}
                                 />
                                 {!editing && (
                                     <p className="text-sm text-gray-500 mt-1">Click edit to change your password</p>
@@ -189,7 +186,11 @@ const Profile = () => {
                                 ) : (
                                     <button
                                         type="button"
-                                        onClick={() => setEditing(true)}
+                                        onClick={() => {
+                                            setEditing(true)
+                                            setSuccess(null); // ⬅️ clear previous success message
+                                            setError(null);   // 
+                                        }}
                                         className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
                                     >
                                         <Edit size={16} />

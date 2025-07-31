@@ -20,7 +20,7 @@ const logger = winston.createLogger({
   ]
 });
 
-// Updated user activity logger
+
 export const userActivityLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(

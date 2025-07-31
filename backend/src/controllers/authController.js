@@ -11,7 +11,7 @@ import { generateOtp, hashOtp } from '../utils/otpUtils.js';
 
 const prisma = new PrismaClient();
 
-// In-memory store for failed login attempts (for demo; use Redis/DB in production)
+// In-memory store for failed login attempts 
 const loginAttempts = {};
 const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
 const MAX_ATTEMPTS = 5;
@@ -34,7 +34,7 @@ const signupSchema = z.object({
         .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
         .regex(/[0-9]/, { message: 'Password must contain at least one number' })
         .regex(/[^A-Za-z0-9]/, { message: 'Password must contain at least one special character' }),
-    role: z.enum(['DONOR', 'CREATOR']).optional() // Only allow donor or creator at registration
+    role: z.enum(['DONOR', 'CREATOR']).optional() 
 });
 
 const loginSchema = z.object({
