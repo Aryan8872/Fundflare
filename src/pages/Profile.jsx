@@ -60,7 +60,7 @@ const Profile = () => {
     if (!user) return (
         <div className="min-h-screen bg-white">
             <div className="flex justify-center items-center h-64">
-                <p className="text-gray-600">Not logged in.</p>
+                <p className="text-gray-600">Please login .</p>
             </div>
         </div>
     );
