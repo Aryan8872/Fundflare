@@ -13,7 +13,7 @@ const UserDashboard = () => {
             ) : isError ? (
                 <div className="text-red-500">{error.message || 'Failed to load donations.'}</div>
             ) : donations.length === 0 ? (
-                <div>No donations yet please try again.</div>
+                <div>No donations yet</div>
             ) : (
                 <table className="w-full text-left bg-white rounded shadow">
                     <thead>
